@@ -1,6 +1,8 @@
 # Stregsystem COBOL TUI
 The very best TUI for the F-Klubben stregsystem written in GnuCOBOL with those nice punchard limitations.
 
+**Status of project**: VERY early stage
+
 # Writing in COBOL
 One can write in two code format modes when comiling. with the --free flag or without it. This proejct tires to do it without.
 This means that the code has to adhere to the lengh of punchcards!
