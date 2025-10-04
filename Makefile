@@ -1,12 +1,12 @@
 COB=cobc
 COBFLAGS=-Wall -x
-
-SRC=$(wildcard src/*.cob)
+MAIN_SRC=src/main.cob
+HELPER_SRC=src/helper.cob
 TARGET=build/app
 
-$(TARGET): $(SRC)
+$(TARGET): $(MAIN_SRC) $(HELPER_SRC)
 	mkdir -p build
-	$(COB) $(COBFLAGS) -o $(TARGET) $(SRC)
+	$(COB) $(COBFLAGS) -o $(TARGET) $(MAIN_SRC) $(HELPER_SRC)
 
 run: $(TARGET)
 	./$(TARGET)
