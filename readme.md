@@ -111,6 +111,11 @@ make run    # Run the app
 make clean  # Clean build artifacts
 ```
 
+### Run temp nim server
+``
+`nim c -r .\test_server.nim`
+
+
 ## Development Notes
 
 Use an editor that shows column numbers. Getting the column positioning wrong is the most common source of compilation errors in fixed-format COBOL.

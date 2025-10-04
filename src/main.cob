@@ -10,6 +10,7 @@
       *     a0.0.4: Added HTTP client module (not used yet)
       *     a0.1.0: Test HTTP client module (Note: CBL IO is a headache)
       *     a0.2.0: Use GNU Netcat
+      *     a0.2.1: Working requests to localhost with GNU netcat
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

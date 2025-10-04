@@ -18,17 +18,20 @@
       * Connection parameters
        01  host-name            PIC X(100).
        01  host-port            PIC 9(5).
+       01  host-port-str        PIC X(5).
 
       * HTTP components
        01  http-method          PIC X(10).
        01  http-path            PIC X(200).
        01  http-body            PIC X(1000).
-       01  body-length       PIC 9(5).
+       01  body-length          PIC 9(5).
+       01  body-length-str      PIC X(5).
 
       * Working variables
        01  system-cmd           PIC X(2000).
        01  system-result        PIC S9(9) COMP-5.
        01  request-cmd          PIC X(2000).
+       01  CRLF                 PIC X(2) VALUE X"0D0A".
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
@@ -58,20 +61,23 @@
 
        EXECUTE-GET-REQUEST.
       *    Build HTTP GET request using printf and nc
+      *    Use numeric display directly in STRING to avoid leading zeros
            STRING
                "printf '"
                FUNCTION TRIM(http-method) " "
-               FUNCTION TRIM(http-path) " HTTP/1.1\r\n"
-               "Host: " FUNCTION TRIM(host-name) "\r\n"
-               "User-Agent: COBOL-HTTP-Client/1.0\r\n"
-               "Accept: */*\r\n"
-               "Connection: close\r\n"
-               "\r\n' | "
-               "nc " FUNCTION TRIM(host-name) " " host-port
+               FUNCTION TRIM(http-path) " HTTP/1.1" CRLF
+               "Host: " FUNCTION TRIM(host-name) CRLF
+               "User-Agent: COBOL-HTTP-Client/1.0" CRLF
+               "Accept: */*" CRLF
+               "Connection: close" CRLF
+               CRLF "' | "
+               "nc " FUNCTION TRIM(host-name) " "
+               host-port
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
 
+           DISPLAY "Command: " FUNCTION TRIM(system-cmd)
            DISPLAY "Sending GET request..."
            CALL "SYSTEM" USING system-cmd RETURNING system-result
            END-CALL
@@ -86,23 +92,26 @@
                FUNCTION LENGTH(FUNCTION TRIM(http-body))
 
       *    Build HTTP POST request using printf and nc
+      *    Use numeric display directly to avoid leading zeros
            STRING
                "printf '"
                FUNCTION TRIM(http-method) " "
-               FUNCTION TRIM(http-path) " HTTP/1.1\r\n"
-               "Host: " FUNCTION TRIM(host-name) "\r\n"
-               "User-Agent: COBOL-HTTP-Client/1.0\r\n"
-               "Accept: */*\r\n"
-               "Content-Type: application/json\r\n"
-               "Content-Length: " body-length "\r\n"
-               "Connection: close\r\n"
-               "\r\n"
+               FUNCTION TRIM(http-path) " HTTP/1.1" CRLF
+               "Host: " FUNCTION TRIM(host-name) CRLF
+               "User-Agent: COBOL-HTTP-Client/1.0" CRLF
+               "Accept: */*" CRLF
+               "Content-Type: application/json" CRLF
+               "Content-Length: " body-length CRLF
+               "Connection: close" CRLF
+               CRLF
                FUNCTION TRIM(http-body) "' | "
-               "nc " FUNCTION TRIM(host-name) " " host-port
+               "nc " FUNCTION TRIM(host-name) " "
+               host-port
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
 
+           DISPLAY "Command: " FUNCTION TRIM(system-cmd)
            DISPLAY "Sending POST request..."
            CALL "SYSTEM" USING system-cmd RETURNING system-result
            END-CALL
