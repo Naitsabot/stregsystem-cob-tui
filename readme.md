@@ -23,6 +23,22 @@ Code must follow the 80-column punchcard format:
 
 If your code isn't positioned correctly within these columns, it won't compile.
 
+## Missions
+
+- TUI
+    - SCREEN SECTION for defining display layouts
+    - ACCEPT/DISPLAY with screen positioning
+- HTTP Communication
+    - Needs to be implemented since COBOL is oooooooooold 
+    - Socket Programming with GnuCOBOL
+    - _Optionanally_: File-based IPC (It is suppositly simpler to implement)
+- Async/Await
+    - COBOl is synchronous ...
+    - To implement it i need some kind of threading or polling. Threading is not standard to COBOL
+    - File-based comms is yet again an option
+- Project structure
+    - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
+
 ## Line Endings and Formatting
 
 Fixed-format COBOL is picky about whitespace and line endings. The project uses pre-commit hooks to handle this automatically so you don't have to think about it.
