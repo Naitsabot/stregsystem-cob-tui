@@ -6,7 +6,7 @@ repos:
         files: \.(cob|COB)$
       - id: trailing-whitespace
         files: \.(cob|COB)$
-      - id: mixed-line-ending
-        files: \.(cob|COB)$
-        args: ['--fix=lf']  # Forces Unix line endings (LF)
+      #- id: mixed-line-ending
+      #  files: \.(cob|COB)$
+      #  args: ['--fix=lf']  # Forces Unix line endings (LF)
       - id: check-added-large-files

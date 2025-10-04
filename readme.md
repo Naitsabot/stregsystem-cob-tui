@@ -59,7 +59,7 @@ pre-commit run --files src/*.cob
 
 ## Installation
 
-### Installing GnuCOBOL and GNU Netcat
+### Installing GnuCOBOL, GNU Netcat
 
 You need the GnuCOBOL compiler to build this project.
 

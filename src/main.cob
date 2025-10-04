@@ -8,7 +8,7 @@
       *     a0.0.2: Working basic program, and helper file corrected
       *     a0.0.3: Fixed format for punch card style COBOL
       *     a0.0.4: Added HTTP client module (not used yet)
-      *     a0.1.0: Test HTTP client module
+      *     a0.1.0: Test HTTP client module (Note: CBL IO is a headache)
       *     a0.2.0: Use GNU Netcat
       ******************************************************************
        IDENTIFICATION DIVISION.
