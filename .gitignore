@@ -1,0 +1,50 @@
+# Compiled object files
+*.o
+*.obj
+
+# Compiled binaries
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+a.out
+
+# COBOL generated intermediate files
+*.lst
+*.mod
+*.cobc
+
+# C compiler outputs
+*.gch
+*.pch
+
+# Debug files
+*.stackdump
+*.core
+core.*
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Build directories
+/build/
+/dist/
+/bin/
+/lib/
+
+# Coverage and testing
+*.gcda
+*.gcno
+*.gcov
+
+# IDE/editor junk
+*.DS_Store
+*.vscode/
+*.idea/
+*.project
+*.classpath
+*.settings/
