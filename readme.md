@@ -59,37 +59,40 @@ pre-commit run --files src/*.cob
 
 ## Installation
 
-### Installing GnuCOBOL
+### Installing GnuCOBOL and GNU Netcat
 
 You need the GnuCOBOL compiler to build this project.
 
 #### Arch Linux
 ```bash
-yay -S gnucobol
+yay -S gnucobol gnu-netcat
 ```
 
 #### Debian/Ubuntu
 ```bash
 sudo apt-get update
-sudo apt-get install gnucobol
+sudo apt-get install gnucobol gnu-netcat
 ```
 
 #### Fedora/RHEL
 ```bash
-sudo dnf install gnucobol
+sudo dnf install gnucobol gnu-netcat
 ```
 
 #### macOS
 ```bash
-brew install gnucobol
+brew install gnucobol gnu-netcat
 ```
 
 #### From Source
 Download from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
 
+Download from [netcat.sourceforge.io](https://netcat.sourceforge.net/) and follow the build instructions in the tarball.
+
 **Verify installation:**
 ```bash
 cobc -v
+nc --version
 ```
 
 You should see version information if GnuCOBOL is installed correctly.
