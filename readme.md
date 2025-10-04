@@ -29,13 +29,12 @@ If your code isn't positioned correctly within these columns, it won't compile.
     - SCREEN SECTION for defining display layouts
     - ACCEPT/DISPLAY with screen positioning
 - HTTP Communication
-    - Needs to be implemented since COBOL is oooooooooold 
-    - Socket Programming with GnuCOBOL
+    - Needs to be implemented since COBOL is oooooooooold
+    - Options:
+        - Directly pass into shell and execute with GNU Netcat
+        - File-based IPC
+        - ``CBL_SOCKET_*` with GnuCOBOL
     - _Optionanally_: File-based IPC (It is suppositly simpler to implement)
-- Async/Await
-    - COBOl is synchronous ...
-    - To implement it i need some kind of threading or polling. Threading is not standard to COBOL
-    - File-based comms is yet again an option
 - Project structure
     - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
 
