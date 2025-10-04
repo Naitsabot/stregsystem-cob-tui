@@ -23,20 +23,26 @@ Code must follow the 80-column punchcard format:
 
 If your code isn't positioned correctly within these columns, it won't compile.
 
+### Some documentation
+- GnuCOBOL Manual: https://gnucobol.sourceforge.io/doc/gnucobol.html
+- GnuCOBOL Programmer’s Guide: https://gnucobol.sourceforge.io/HTML/gnucobpg.html
+- DevDocs of GnuCOBOL Programmer’s Guide: https://devdocs.io/gnu_cobol/
+
 ## Missions
 
 - TUI
     - SCREEN SECTION for defining display layouts
     - ACCEPT/DISPLAY with screen positioning
 - HTTP Communication
-    - Needs to be implemented since COBOL is oooooooooold
+    - COBOL is oooooooooold and does not support TCP
     - Options:
         - Directly pass into shell and execute with GNU Netcat
         - File-based IPC
         - ``CBL_SOCKET_*` with GnuCOBOL
-    - _Optionanally_: File-based IPC (It is suppositly simpler to implement)
+    - Implementing tcp sounds interesting (https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) (https://github.com/OCamlPro/gnucobol-contrib/) (https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
 - Project structure
     - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
+
 
 ## Line Endings and Formatting
 
