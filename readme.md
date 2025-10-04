@@ -1,42 +1,97 @@
 # Stregsystem COBOL TUI
-The very best TUI for the F-Klubben stregsystem written in GnuCOBOL with those nice punchard limitations.
 
-**Status of project**: VERY early stage
+A terminal user interface for the F-Klubben stregsystem, written in GnuCOBOL with those nice punchcard limitations.
 
-# Writing in COBOL
-One can write in two code format modes when comiling. with the --free flag or without it. This proejct tires to do it without.
-This means that the code has to adhere to the lengh of punchcards!
-- Columns 1-6: Sequence numbers (optional, usually blank)
-- Column 7: Indicator area (* for comments, - for continuation, blank for code)
-- Columns 8-11: Area A (division, section, paragraph names, level numbers 01-49)
-- Columns 12-72: Area B (statements, clauses)
-- Columns 73-80: Identification area (ignored, originally for card identification)
+**Project Status**: Very early stage
 
-## EOL and stuff like that
-It is a pain in the ass. So i have used the pre-commit framework to remember it for me.
+## Writing in COBOL
+
+This project uses fixed-format COBOL (compiled without the `--free` flag) to stick with traditional punchcard conventions.
+
+### Punchcard Column Layout
+
+Code must follow the 80-column punchcard format:
+
+- **Columns 1-6**: Sequence numbers (optional, usually blank)
+- **Column 7**: Indicator area
+    - `*` = Comment line
+    - `-` = Continuation of previous line
+    - blank = Regular code line
+- **Columns 8-11**: Area A (division headers, section names, paragraph names, level numbers 01-49)
+- **Columns 12-72**: Area B (statements, procedure code)
+- **Columns 73-80**: Identification area (ignored by compiler)
+
+If your code isn't positioned correctly within these columns, it won't compile.
+
+## Line Endings and Formatting
+
+Fixed-format COBOL is picky about whitespace and line endings. The project uses pre-commit hooks to handle this automatically so you don't have to think about it.
 
 ```bash
-pacman -S pre-commit # Or your preferred packagemanager (or pip, its python after all)
+# Install pre-commit
+pacman -S pre-commit  # Or pip install pre-commit
+
+# Set up the hooks
 pre-commit install
-pre-commit run
+
+# Run manually if needed
+pre-commit run --all-files
+
+# Test on just COBOL files
+pre-commit run --files src/*.cob
 ```
 
-# Installing
-## GnuCOBOL
+## Installation
 
-| Source | Link | cmd |
-| - | - | - |
-| Sourceforge | https://gnucobol.sourceforge.io/ | |
-| Arch. AUR | https://aur.archlinux.org/packages/gnucobol | `yay -S gnucobol` |
+### Installing GnuCOBOL
 
+You need the GnuCOBOL compiler to build this project.
 
-Verify install with: `cobc -v`
+#### Arch Linux
+```bash
+yay -S gnucobol
+```
+
+#### Debian/Ubuntu
+```bash
+sudo apt-get update
+sudo apt-get install gnucobol
+```
+
+#### Fedora/RHEL
+```bash
+sudo dnf install gnucobol
+```
+
+#### macOS
+```bash
+brew install gnucobol
+```
+
+#### From Source
+Download from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
+
+**Verify installation:**
+```bash
+cobc -v
+```
+
+You should see version information if GnuCOBOL is installed correctly.
+
+### Installing the TUI
+
+Not implemented yet. When it is, there will probably be a package or install script here.
 
 `¯\_(ツ)_/¯`
 
-# Usage
-``` bash
-make        # compile to build/app
-make run    # run the app
-make clean  # clean build
+## Usage
+
+```bash
+make        # Compile to build/app
+make run    # Run the app
+make clean  # Clean build artifacts
 ```
+
+## Development Notes
+
+Use an editor that shows column numbers. Getting the column positioning wrong is the most common source of compilation errors in fixed-format COBOL.
