@@ -10,8 +10,8 @@ This means that the code has to adhere to the lengh of punchcards!
 - Columns 12-72: Area B (statements, clauses)
 - Columns 73-80: Identification area (ignored, originally for card identification)
 
-## EOL and stuuf like that
-It is a pain in the ass. So i have used the pre-commit framework to remmeber it for me.
+## EOL and stuff like that
+It is a pain in the ass. So i have used the pre-commit framework to remember it for me.
 
 ```bash
 pacman -S pre-commit # Or your preferred packagemanager (or pip, its python after all)
