@@ -2,7 +2,7 @@
       * Author: Naitsabot
       * Description:
       *     Stregsystem TUI written in GnuCOBOL
-      * Version: a0.0.4
+      * Version: a0.2.2
       * Version history:
       *     a0.0.1: Initial commit, basic program
       *     a0.0.2: Working basic program, and helper file corrected
@@ -11,6 +11,7 @@
       *     a0.1.0: Test HTTP client module (Note: CBL IO is a headache)
       *     a0.2.0: Use GNU Netcat
       *     a0.2.1: Working requests to localhost with GNU netcat
+      *     a0.2.2: Very minor changes in strings
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -28,7 +29,7 @@
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
-           CALL 'HELPER'.
+           CALL "HELPER".
 
            DISPLAY " "
            DISPLAY "1. Manual input test"

@@ -17,7 +17,7 @@
        WORKING-STORAGE SECTION.
       * Connection parameters
        01  host-name            PIC X(100).
-       01  host-port            PIC 9(5).
+       01  host-port            PIC X(5).
        01  host-port-str        PIC X(5).
 
       * HTTP components
@@ -38,7 +38,7 @@
       *    Test GET request to /test endpoint
            DISPLAY "=== Testing GET /test ==="
            MOVE "127.0.0.1" TO host-name
-           MOVE 8080 TO host-port
+           MOVE "8080" TO host-port
            MOVE "GET" TO http-method
            MOVE "/test" TO http-path
            MOVE SPACES TO http-body
@@ -49,7 +49,7 @@
       *    Test POST request to /api/purchase
            DISPLAY "=== Testing POST /api/purchase ==="
            MOVE "127.0.0.1" TO host-name
-           MOVE 8080 TO host-port
+           MOVE "8080" TO host-port
            MOVE "POST" TO http-method
            MOVE "/api/purchase" TO http-path
            MOVE '{"username":"cobol_user","item":"coffee"}'
@@ -72,7 +72,7 @@
                "Connection: close" CRLF
                CRLF "' | "
                "nc " FUNCTION TRIM(host-name) " "
-               host-port
+               FUNCTION TRIM(host-port)
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
@@ -106,7 +106,7 @@
                CRLF
                FUNCTION TRIM(http-body) "' | "
                "nc " FUNCTION TRIM(host-name) " "
-               host-port
+               FUNCTION TRIM(host-port)
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
