@@ -14,35 +14,43 @@ Code must follow the 80-column punchcard format:
 
 - **Columns 1-6**: Sequence numbers (optional, usually blank)
 - **Column 7**: Indicator area
-    - `*` = Comment line
-    - `-` = Continuation of previous line
-    - blank = Regular code line
+  - `*` = Comment line
+  - `-` = Continuation of previous line
+  - blank = Regular code line
 - **Columns 8-11**: Area A (division headers, section names, paragraph names, level numbers 01-49)
 - **Columns 12-72**: Area B (statements, procedure code)
 - **Columns 73-80**: Identification area (ignored by compiler)
 
 If your code isn't positioned correctly within these columns, it won't compile.
 
+```text
+000000.AAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBIIIIIIII
+```
+
 ### Some documentation
-- GnuCOBOL Manual: https://gnucobol.sourceforge.io/doc/gnucobol.html
-- GnuCOBOL Programmer’s Guide: https://gnucobol.sourceforge.io/HTML/gnucobpg.html
-- DevDocs of GnuCOBOL Programmer’s Guide: https://devdocs.io/gnu_cobol/
+
+- GnuCOBOL Manual: [https://gnucobol.sourceforge.io/doc/gnucobol.html](https://gnucobol.sourceforge.io/doc/gnucobol.html)
+- GnuCOBOL Programmer’s Guide: [https://gnucobol.sourceforge.io/HTML/gnucobpg.html](https://gnucobol.sourceforge.io/HTML/gnucobpg.html)
+- DevDocs of GnuCOBOL Programmer’s Guide: [https://devdocs.io/gnu_cobol/](https://devdocs.io/gnu_cobol/)
+
+### Procedures and data sections
+
+params: [https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures](https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures)
 
 ## Missions
 
 - TUI
-    - SCREEN SECTION for defining display layouts
-    - ACCEPT/DISPLAY with screen positioning
+  - SCREEN SECTION for defining display layouts
+  - ACCEPT/DISPLAY with screen positioning
 - HTTP Communication
-    - COBOL is oooooooooold and does not support TCP
-    - Options:
-        - Directly pass into shell and execute with GNU Netcat
-        - File-based IPC
-        - ``CBL_SOCKET_*` with GnuCOBOL
-    - Implementing tcp sounds interesting (https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) (https://github.com/OCamlPro/gnucobol-contrib/) (https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
+  - COBOL is oooooooooold and does not support TCP
+  - Options:
+    - Directly pass into shell and execute with GNU Netcat
+    - File-based IPC
+    - ``CBL_SOCKET_*` with GnuCOBOL
+  - Implementing tcp sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
 - Project structure
-    - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
-
+  - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
 
 ## Line Endings and Formatting
 
@@ -69,32 +77,38 @@ pre-commit run --files src/*.cob
 You need the GnuCOBOL compiler to build this project.
 
 #### Arch Linux
+
 ```bash
 yay -S gnucobol gnu-netcat
 ```
 
 #### Debian/Ubuntu
+
 ```bash
 sudo apt-get update
 sudo apt-get install gnucobol gnu-netcat
 ```
 
 #### Fedora/RHEL
+
 ```bash
 sudo dnf install gnucobol gnu-netcat
 ```
 
 #### macOS
+
 ```bash
 brew install gnucobol gnu-netcat
 ```
 
 #### From Source
+
 Download from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
 
 Download from [netcat.sourceforge.io](https://netcat.sourceforge.net/) and follow the build instructions in the tarball.
 
 **Verify installation:**
+
 ```bash
 cobc -v
 nc --version
@@ -117,9 +131,8 @@ make clean  # Clean build artifacts
 ```
 
 ### Run temp nim server
-``
-`nim c -r .\test_server.nim`
 
+`nim c -r .\test_server.nim`
 
 ## Development Notes
 

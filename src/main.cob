@@ -2,7 +2,7 @@
       * Author: Naitsabot
       * Description:
       *     Stregsystem TUI written in GnuCOBOL
-      * Version: a0.2.2
+      * Version: a0.2.3
       * Version history:
       *     a0.0.1: Initial commit, basic program
       *     a0.0.2: Working basic program, and helper file corrected
@@ -12,6 +12,7 @@
       *     a0.2.0: Use GNU Netcat
       *     a0.2.1: Working requests to localhost with GNU netcat
       *     a0.2.2: Very minor changes in strings
+      *     a0.2.3: Formatting
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -23,9 +24,9 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  USER-NAME            PIC A(30).
-       01  ITEM                 PIC A(30).
-       01  USER-CHOICE          PIC 9.
+       01  user-name            PIC A(30).
+       01  item                 PIC A(30).
+       01  user-choice          PIC 9.
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
@@ -35,9 +36,9 @@
            DISPLAY "1. Manual input test"
            DISPLAY "2. Run HTTP tests"
            DISPLAY "Choose option: " WITH NO ADVANCING
-           ACCEPT USER-CHOICE
+           ACCEPT user-choice
 
-           EVALUATE USER-CHOICE
+           EVALUATE user-choice
                WHEN 1
                    PERFORM MANUAL-INPUT-TEST
                WHEN 2
@@ -50,13 +51,13 @@
 
        MANUAL-INPUT-TEST.
            DISPLAY "What is your username?"
-           ACCEPT USER-NAME
+           ACCEPT user-name
            DISPLAY "Nice to meet you, "
-                   FUNCTION TRIM(USER-NAME) "!"
+                   FUNCTION TRIM(user-name) "!"
            DISPLAY "What item do you want to buy?"
-           ACCEPT ITEM
-           DISPLAY FUNCTION TRIM(USER-NAME) " wants to buy: "
-                   FUNCTION TRIM(ITEM).
+           ACCEPT item
+           DISPLAY FUNCTION TRIM(user-name) " wants to buy: "
+                   FUNCTION TRIM(item).
 
        HTTP-TEST.
            DISPLAY "Starting HTTP client tests..."
