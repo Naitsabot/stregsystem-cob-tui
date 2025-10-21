@@ -13,6 +13,7 @@
       *     a0.2.1: Working requests to localhost with GNU netcat
       *     a0.2.2: Very minor changes in strings
       *     a0.2.3: Formatting
+      *     a0.2.4: Genreallized nc http-client functionallity
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
