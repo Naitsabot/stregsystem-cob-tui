@@ -2,7 +2,7 @@
       * Author: Naitsabot
       * Description:
       *     Stregsystem TUI written in GnuCOBOL
-      * Version: a0.2.3
+      * Version: a0.2.5
       * Version history:
       *     a0.0.1: Initial commit, basic program
       *     a0.0.2: Working basic program, and helper file corrected
@@ -14,6 +14,7 @@
       *     a0.2.2: Very minor changes in strings
       *     a0.2.3: Formatting
       *     a0.2.4: Genreallized nc http-client functionallity
+      *     a0.2.5: Updated general nc functionallity + logging levels
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -28,10 +29,13 @@
        01  user-name            PIC A(30).
        01  item                 PIC A(30).
        01  user-choice          PIC 9.
+       01  test-thing           PIC X(4) VALUE "8000".
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
            CALL "HELPER".
+
+           DISPLAY test-thing
 
            DISPLAY " "
            DISPLAY "1. Manual input test"

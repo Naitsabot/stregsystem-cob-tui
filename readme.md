@@ -137,3 +137,29 @@ make clean  # Clean build artifacts
 ## Development Notes
 
 Use an editor that shows column numbers. Getting the column positioning wrong is the most common source of compilation errors in fixed-format COBOL.
+
+## HTTP client logging (verbosity)
+
+Control how much the HTTP client prints with the environment variable `COB_HTTP_CLIENT_LOG` or via the Makefile variable `TEST_LOG`.
+
+- 0 (none, default): no raw HTTP output; only high-level success/failure messages.
+- 1 (minimal): show that requests were sent and whether they succeeded or failed.
+- 2 (verbose): show the exact system command executed and the full HTTP response (headers + body).
+
+Usage examples:
+
+```bash
+# default (no logging)
+make test-api
+
+# minimal
+make test-api TEST_LOG=1
+
+# verbose
+make test-api TEST_LOG=2
+
+# or call binary directly
+COB_HTTP_CLIENT_LOG=2 ./build/test-api
+```
+
+Note: the client reads the env var once when first used; set it before running the program.
