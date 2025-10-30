@@ -15,6 +15,7 @@
       *     a0.2.3: Formatting
       *     a0.2.4: Genreallized nc http-client functionallity
       *     a0.2.5: Updated general nc functionallity + logging levels
+      *     a0.2.6: Added structure for more API endpoints
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

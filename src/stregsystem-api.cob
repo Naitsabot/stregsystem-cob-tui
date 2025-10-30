@@ -39,6 +39,7 @@
        LINKAGE SECTION.
        01  api-request-data.
            05  api-operation    PIC X(20).
+           05  api-member-id    PIC X(5).
            05  api-room-id      PIC X(5).
            05  api-product-id   PIC X(5).
            05  api-username     PIC X(30).
@@ -48,12 +49,22 @@
                                 api-response-status.
 
        MAIN-LOGIC.
-          IF api-init-done = 0
-              PERFORM INIT-LOGGING
-          END-IF
+           IF api-init-done = 0
+               PERFORM INIT-LOGGING
+           END-IF
            EVALUATE api-operation
                WHEN "SALE"
                    PERFORM API-SALE
+               WHEN "ACTIVE_PRODUCTS"
+                   PERFORM API-ACTIVE-PRODUCTS
+               WHEN "NAMED_PRODUCTS"
+                   PERFORM API-NAMED-PRODUCTS
+               WHEN "GET_MEMBER_ID"
+                   PERFORM API-GET-MEMBER-ID
+               WHEN "GET_MEMBER"
+                   PERFORM API-GET-MEMBER
+               WHEN "GET_MEMBER_SALES"
+                   PERFORM API-GET-MEMBER-SALES
                WHEN "TEST"
                    PERFORM API-TEST
                WHEN OTHER
@@ -62,6 +73,147 @@
            END-EVALUATE
 
            GOBACK.
+      * GET /api/products/active_products?room_id={room_id}
+       API-ACTIVE-PRODUCTS.
+           IF api-log-level >= 1
+               DISPLAY "Fetching active products for room " api-room-id "..."
+           END-IF
+           MOVE "GET" TO req-method
+           MOVE api-host TO req-host
+           MOVE api-port TO req-port
+           STRING "/api/products/active_products?room_id="
+                  FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
+                  INTO req-path
+           END-STRING
+           MOVE SPACES TO req-body
+           IF api-log-level >= 2
+               DISPLAY "Request path: " FUNCTION TRIM(req-path)
+           END-IF
+           CALL "HTTP-CLIENT" USING http-request http-status
+           END-CALL
+           MOVE http-status TO api-response-status
+           IF http-status = 0
+               IF api-log-level >= 1
+                   DISPLAY "Active products fetched successfully"
+               END-IF
+           ELSE
+               IF api-log-level >= 1
+                   DISPLAY "Active products fetch failed"
+               END-IF
+           END-IF.
+
+      * GET /api/products/named_products
+       API-NAMED-PRODUCTS.
+           IF api-log-level >= 1
+               DISPLAY "Fetching named products..."
+           END-IF
+           MOVE "GET" TO req-method
+           MOVE api-host TO req-host
+           MOVE api-port TO req-port
+           MOVE "/api/products/named_products" TO req-path
+           MOVE SPACES TO req-body
+           IF api-log-level >= 2
+               DISPLAY "Request path: " FUNCTION TRIM(req-path)
+           END-IF
+           CALL "HTTP-CLIENT" USING http-request http-status
+           END-CALL
+           MOVE http-status TO api-response-status
+           IF http-status = 0
+               IF api-log-level >= 1
+                   DISPLAY "Named products fetched successfully"
+               END-IF
+           ELSE
+               IF api-log-level >= 1
+                   DISPLAY "Named products fetch failed"
+               END-IF
+           END-IF.
+
+      * GET /api/member/get_id?username={username}
+       API-GET-MEMBER-ID.
+           IF api-log-level >= 1
+               DISPLAY "Fetching member id for username " api-username "..."
+           END-IF
+           MOVE "GET" TO req-method
+           MOVE api-host TO req-host
+           MOVE api-port TO req-port
+           STRING "/api/member/get_id?username="
+                  FUNCTION TRIM(api-username) DELIMITED BY SIZE
+                  INTO req-path
+           END-STRING
+           MOVE SPACES TO req-body
+           IF api-log-level >= 2
+               DISPLAY "Request path: " FUNCTION TRIM(req-path)
+           END-IF
+           CALL "HTTP-CLIENT" USING http-request http-status
+           END-CALL
+           MOVE http-status TO api-response-status
+           IF http-status = 0
+               IF api-log-level >= 1
+                   DISPLAY "Member id fetched successfully"
+               END-IF
+           ELSE
+               IF api-log-level >= 1
+                   DISPLAY "Member id fetch failed"
+               END-IF
+           END-IF.
+
+      * GET /api/member?member_id={member_id}
+       API-GET-MEMBER.
+           IF api-log-level >= 1
+               DISPLAY "Fetching member info for id " api-member-id "..."
+           END-IF
+           MOVE "GET" TO req-method
+           MOVE api-host TO req-host
+           MOVE api-port TO req-port
+           STRING "/api/member?member_id="
+                  FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+                  INTO req-path
+           END-STRING
+           MOVE SPACES TO req-body
+           IF api-log-level >= 2
+               DISPLAY "Request path: " FUNCTION TRIM(req-path)
+           END-IF
+           CALL "HTTP-CLIENT" USING http-request http-status
+           END-CALL
+           MOVE http-status TO api-response-status
+           IF http-status = 0
+               IF api-log-level >= 1
+                   DISPLAY "Member info fetched successfully"
+               END-IF
+           ELSE
+               IF api-log-level >= 1
+                   DISPLAY "Member info fetch failed"
+               END-IF
+           END-IF.
+
+      * GET /api/member/sales?member_id={member_id}
+       API-GET-MEMBER-SALES.
+           IF api-log-level >= 1
+               DISPLAY "Fetching sales for member id " api-member-id "..."
+           END-IF
+           MOVE "GET" TO req-method
+           MOVE api-host TO req-host
+           MOVE api-port TO req-port
+           STRING "/api/member/sales?member_id="
+                  FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+                  INTO req-path
+           END-STRING
+           MOVE SPACES TO req-body
+           IF api-log-level >= 2
+               DISPLAY "Request path: " FUNCTION TRIM(req-path)
+           END-IF
+           CALL "HTTP-CLIENT" USING http-request http-status
+           END-CALL
+           MOVE http-status TO api-response-status
+           IF http-status = 0
+               IF api-log-level >= 1
+                   DISPLAY "Member sales fetched successfully"
+               END-IF
+           ELSE
+               IF api-log-level >= 1
+                   DISPLAY "Member sales fetch failed"
+               END-IF
+           END-IF.
 
        API-SALE.
            IF api-log-level >= 1
@@ -78,9 +230,9 @@
       *    Build buystring: username + space + product-id
            MOVE SPACES TO buystring
            STRING
-               api-username DELIMITED BY SPACE
+               api-username DELIMITED BY SIZE
                " " DELIMITED BY SIZE
-               api-product-id DELIMITED BY SPACE
+               api-product-id DELIMITED BY SIZE
                INTO buystring
            END-STRING
 
@@ -89,11 +241,11 @@
            MOVE SPACES TO req-body
            STRING
                '{"member_id":' DELIMITED BY SIZE
-               FUNCTION TRIM(api-room-id) DELIMITED BY SPACE
+               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
                ',"buystring":"' DELIMITED BY SIZE
-               FUNCTION TRIM(buystring) DELIMITED BY SPACE
+               FUNCTION TRIM(buystring) DELIMITED BY SIZE
                '","room":' DELIMITED BY SIZE
-               FUNCTION TRIM(api-room-id) DELIMITED BY SPACE
+               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
                '}' DELIMITED BY SIZE
                INTO req-body
            END-STRING
@@ -129,7 +281,7 @@
            MOVE SPACES TO req-body
 
            CALL "HTTP-CLIENT" USING http-request http-status
-           END-CALL
+               END-CALL
 
            MOVE http-status TO api-response-status
 

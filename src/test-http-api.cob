@@ -18,6 +18,7 @@
        01  api-request.
            05  api-operation    PIC X(20).
            05  api-room-id      PIC X(5).
+           05  api-member-id    PIC X(5).
            05  api-product-id   PIC X(5).
            05  api-username     PIC X(30).
        01  api-status           PIC S9(9) COMP-5.
