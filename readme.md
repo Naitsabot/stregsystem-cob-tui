@@ -37,37 +37,7 @@ If your code isn't positioned correctly within these columns, it won't compile.
 
 params: [https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures](https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures)
 
-## Missions
-
-- TUI
-  - SCREEN SECTION for defining display layouts
-  - ACCEPT/DISPLAY with screen positioning
-- HTTP/1.1 Communication
-  - COBOL is oooooooooold and does not support TCP intrinsically
-  - Options:
-    - Directly pass into shell and execute with curl or another CLI HTTP client
-    - Use sockets via C bindings
-    - File-based IPC
-    - ``CBL_SOCKET_*` with GnuCOBOL if i can find it compiled with socket support
-  - Implementing tcp sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
-- DATA handling
-  - JSON encoding/decoding [https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/](https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/) [https://learnxbyexample.com/cobol/json/](https://learnxbyexample.com/cobol/json/)
-- Project structure
-  - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
-  - Modularization
-    - Separate files for different modules
-    - Clear interfaces between modules
-- Build system
-  - Makefile to automate compilation and linking
-  - Handling dependencies
-- Testing
-  - Unit tests for individual modules
-  - Integration tests for the whole application
-- Documentation
-  - Code comments
-  - User manual for the TUI application
-
-## Line Endings and Formatting
+### Line Endings and Formatting
 
 Fixed-format COBOL is picky about whitespace and line endings. The project uses pre-commit hooks to handle this automatically so you don't have to think about it.
 
@@ -85,11 +55,48 @@ pre-commit run --all-files
 pre-commit run --files src/*.cob
 ```
 
+## Missions
+
+- TUI
+  - COBOLs SCREEN SECTION for defining display layouts
+  - ACCEPT/DISPLAY with screen positioning
+- HTTP/1.1 Communication
+  - COBOL is oooooooooold and does not support TCP intrinsically
+  - Options:
+    - Directly pass into shell and execute with curl or another CLI HTTP client
+    - Use sockets via C bindings
+    - File-based IPC
+    - ``CBL_SOCKET_*` with GnuCOBOL if i can find it compiled with socket support
+    - Implementing TCP in COBOL sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
+- DATA handling
+  - JSON encoding/decoding [https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/](https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/) [https://learnxbyexample.com/cobol/json/](https://learnxbyexample.com/cobol/json/)
+  - Nothing is saved locally; all data is fetched from the API on demand
+- Project structure
+  - Needs to be expandable for multiple use cases
+    - Separate files for different modules
+    - Clear interfaces between modules
+- Build system
+  - Makefile to automate compilation and linking
+  - Handling dependencies
+- Testing
+  - Unit tests for individual modules
+  - Integration tests for the whole application
+- Documentation
+  - Code comments
+  - User manual for the TUI application
+
+### Progress
+
+- [ ] Basic TUI layout with SCREEN SECTION
+- [x] HTTP/1.1 client integrated with stregsystem API
+- [ ] JSON parsing and serialization
+- [ ] COBOL tcp HTTP client (if feasible)
+
 ## Installation
 
 ### Installing GnuCOBOL and curl
 
-You need the GnuCOBOL compiler to build this project and a CLI HTTP client such as `curl` for the curl-based HTTP client.
+You need the GnuCOBOL compiler to build this project and a CLI HTTP client, here `curl`, for the curl-based HTTP client.
 
 #### Arch Linux
 
@@ -145,11 +152,22 @@ make run    # Run the app
 make clean  # Clean build artifacts
 ```
 
-## Development Notes
+### Testing
 
-Use an editor that shows column numbers. Getting the column positioning wrong is the most common source of compilation errors in fixed-format COBOL.
+Run tests with:
 
-## HTTP client logging (verbosity)
+```bash
+make test
+```
+
+or inducivual test files:
+
+```bash
+make test-json
+make test-api
+```
+
+#### HTTP client logging (verbosity)
 
 Control how much the HTTP client prints with the environment variable `COB_HTTP_CLIENT_LOG` or via the Makefile variable `TEST_LOG`.
 
@@ -175,17 +193,6 @@ COB_HTTP_CLIENT_LOG=2 ./build/test-api
 
 Note: the client reads the env var once when first used; set it before running the program.
 
-## Testing
+## Development Notes
 
-Run tests with:
-
-```bash
-make test
-```
-
-or inducivual test files:
-
-```bash
-make test-json
-make test-api
-```
+Use an editor that shows column numbers. Getting the column positioning wrong is the most common source of compilation errors in fixed-format COBOL.
