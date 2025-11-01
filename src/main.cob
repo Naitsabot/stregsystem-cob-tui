@@ -2,25 +2,26 @@
       * Author: Naitsabot
       * Description:
       *     Stregsystem TUI written in GnuCOBOL
-      * Version: a0.2.8
+      * Version: a0.3.0
       * Version history:
-      *     a0.0.1: Initial commit, basic program
-      *     a0.0.2: Working basic program, and helper file corrected
-      *     a0.0.3: Fixed format for punch card style COBOL
-      *     a0.0.4: Added HTTP client module (not used yet)
-      *     a0.1.0: Test HTTP client module (Note: CBL IO is a headache)
-      *     a0.2.0: Use GNU Netcat
-      *     a0.2.1: Working requests to localhost with GNU netcat
-      *     a0.2.2: Very minor changes in strings
-      *     a0.2.3: Formatting
-      *     a0.2.4: Genreallized nc http-client functionality
-      *     a0.2.5: Updated general nc functionality + logging levels
-      *     a0.2.6: Added structure for more API endpoints
+      *     a0.0.1: Initial commit, basic program.
+      *     a0.0.2: Working basic program, and helper file corrected.
+      *     a0.0.3: Fixed format for punch card style COBOL.
+      *     a0.0.4: Added HTTP client module (not used yet).
+      *     a0.1.0: Test HTTP client module (Note:CBL IO is a headache).
+      *     a0.2.0: Use GNU Netcat.
+      *     a0.2.1: Working requests to localhost with GNU netcat.
+      *     a0.2.2: Very minor changes in strings.
+      *     a0.2.3: Formatting.
+      *     a0.2.4: Genreallized nc http-client functionality.
+      *     a0.2.5: Updated general nc functionality + logging levels.
+      *     a0.2.6: Added structure for more API endpoints.
       *     a0.2.7: Logic and tests for all theroretically needed
-      *             stregsystem-endpoints for the application
+      *             stregsystem-endpoints for the application.
       *     a0.2.8: Change from transportation layer comms. protoocl
       *             to application layer protocol. Netcat -> Curl.
       *             (reduces overhead, removed HTTP build painpoint).
+      *     a0.3.0: Beginning of JSON encoding and decoding.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

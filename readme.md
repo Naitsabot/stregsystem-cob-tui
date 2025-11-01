@@ -50,6 +50,8 @@ params: [https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures]
     - File-based IPC
     - ``CBL_SOCKET_*` with GnuCOBOL if i can find it compiled with socket support
   - Implementing tcp sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
+- DATA handling
+  - JSON encoding/decoding [https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/](https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/) [https://learnxbyexample.com/cobol/json/](https://learnxbyexample.com/cobol/json/)
 - Project structure
   - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
   - Modularization
