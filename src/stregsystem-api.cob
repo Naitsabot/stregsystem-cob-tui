@@ -49,41 +49,64 @@
                                 api-response-status.
 
        MAIN-LOGIC.
+           MOVE SPACE TO http-request
            IF api-init-done = 0
                PERFORM INIT-LOGGING
            END-IF
+
+
            EVALUATE api-operation
-               WHEN "SALE"
-                   PERFORM API-SALE
-               WHEN "ACTIVE_PRODUCTS"
-                   PERFORM API-ACTIVE-PRODUCTS
-               WHEN "NAMED_PRODUCTS"
-                   PERFORM API-NAMED-PRODUCTS
-               WHEN "GET_MEMBER_ID"
-                   PERFORM API-GET-MEMBER-ID
-               WHEN "GET_MEMBER"
-                   PERFORM API-GET-MEMBER
-               WHEN "GET_MEMBER_SALES"
-                   PERFORM API-GET-MEMBER-SALES
+               WHEN "xPOST_SALE"
+                   PERFORM API-xPOST-SALE
+               WHEN "xGET_ACTIVE_PRODUCTS"
+                   PERFORM API-xGET-ACTIVE-PRODUCTS
+               WHEN "xGET_NAMED_PRODUCTS"
+                   PERFORM API-xGET-NAMED-PRODUCTS
+               WHEN "xGET_MEMBER_ID"
+                   PERFORM API-xGET-MEMBER-ID
+               WHEN "xGET_MEMBER"
+                   PERFORM API-xGET-MEMBER
+               WHEN "xGET_MEMBER_SALES"
+                   PERFORM API-xGET-MEMBER-SALES
                WHEN "TEST"
-                   PERFORM API-TEST
+                   PERFORM API-xGET-TEST
                WHEN OTHER
                    DISPLAY "Unknown API operation: " api-operation
                    MOVE 1 TO api-response-status
            END-EVALUATE
 
+           MOVE SPACES TO api-operation
+           MOVE SPACES TO api-member-id
+           MOVE SPACES TO api-room-id
+           MOVE SPACES TO api-product-id
+           MOVE SPACES TO api-username
+
            GOBACK.
+
       * GET /api/products/active_products?room_id={room_id}
-       API-ACTIVE-PRODUCTS.
+      * Request: room_id via query parameter
+      * Response: disctionary of active products for the room
+      * {
+      *   "123": {
+      *     "name": "Beer",
+      *     "price": 600
+      *   },
+      *   "124": {
+      *     "name": "Beer2",
+      *     "price": 650
+      *   }
+      * }
+       API-xGET-ACTIVE-PRODUCTS.
            IF api-log-level >= 1
-               DISPLAY "Fetching active products for room " api-room-id "..."
+               DISPLAY "Fetching active products for room "
+               api-room-id "..."
            END-IF
            MOVE "GET" TO req-method
            MOVE api-host TO req-host
            MOVE api-port TO req-port
            STRING "/api/products/active_products?room_id="
-                  FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
-                  INTO req-path
+               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
+               INTO req-path
            END-STRING
            MOVE SPACES TO req-body
            IF api-log-level >= 2
@@ -94,16 +117,24 @@
            MOVE http-status TO api-response-status
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Active products fetched successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Active products fetch failed"
                END-IF
            END-IF.
 
       * GET /api/products/named_products
-       API-NAMED-PRODUCTS.
+      *
+      * Request: (no parameters)
+      * Response: JSON list of named products key-valued to IDs
+      * {
+      *   "beer": 123
+      * }
+       API-xGET-NAMED-PRODUCTS.
            IF api-log-level >= 1
                DISPLAY "Fetching named products..."
            END-IF
@@ -120,25 +151,33 @@
            MOVE http-status TO api-response-status
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Named products fetched successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Named products fetch failed"
                END-IF
            END-IF.
 
       * GET /api/member/get_id?username={username}
-       API-GET-MEMBER-ID.
+      * Request: username via query parameter
+      * Response: member id of the user
+      * {
+      *   "member_id": 321,
+      * }
+       API-xGET-MEMBER-ID.
            IF api-log-level >= 1
-               DISPLAY "Fetching member id for username " api-username "..."
+               DISPLAY "Fetching member id for username "
+               api-username "..."
            END-IF
            MOVE "GET" TO req-method
            MOVE api-host TO req-host
            MOVE api-port TO req-port
            STRING "/api/member/get_id?username="
-                  FUNCTION TRIM(api-username) DELIMITED BY SIZE
-                  INTO req-path
+               FUNCTION TRIM(api-username) DELIMITED BY SIZE
+               INTO req-path
            END-STRING
            MOVE SPACES TO req-body
            IF api-log-level >= 2
@@ -149,25 +188,36 @@
            MOVE http-status TO api-response-status
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member id fetched successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member id fetch failed"
                END-IF
            END-IF.
 
       * GET /api/member?member_id={member_id}
-       API-GET-MEMBER.
+      * Request: member id via query parameter
+      * Response:
+      * {
+      *   "balance": 20000,
+      *   "username": "kresten",
+      *   "active": true,
+      *   "name": "Kresten Laust"
+      * }
+       API-xGET-MEMBER.
            IF api-log-level >= 1
-               DISPLAY "Fetching member info for id " api-member-id "..."
+               DISPLAY "Fetching member info for id "
+                       api-member-id "..."
            END-IF
            MOVE "GET" TO req-method
            MOVE api-host TO req-host
            MOVE api-port TO req-port
            STRING "/api/member?member_id="
-                  FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
-                  INTO req-path
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+               INTO req-path
            END-STRING
            MOVE SPACES TO req-body
            IF api-log-level >= 2
@@ -178,25 +228,39 @@
            MOVE http-status TO api-response-status
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member info fetched successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member info fetch failed"
                END-IF
            END-IF.
 
       * GET /api/member/sales?member_id={member_id}
-       API-GET-MEMBER-SALES.
+      * Request: member id via query parameter
+      * Response: list of a member's purchases
+      * {
+      *   "sales": [
+      *     {
+      *       "timestamp": "2004-01-07T15:30:55Z",
+      *       "product": "Beer",
+      *       "price": 600
+      *     }
+      *   ]
+      * }
+       API-xGET-MEMBER-SALES.
            IF api-log-level >= 1
-               DISPLAY "Fetching sales for member id " api-member-id "..."
+               DISPLAY "Fetching sales for member id "
+                       api-member-id "..."
            END-IF
            MOVE "GET" TO req-method
            MOVE api-host TO req-host
            MOVE api-port TO req-port
            STRING "/api/member/sales?member_id="
-                  FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
-                  INTO req-path
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+               INTO req-path
            END-STRING
            MOVE SPACES TO req-body
            IF api-log-level >= 2
@@ -207,15 +271,55 @@
            MOVE http-status TO api-response-status
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member sales fetched successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Member sales fetch failed"
                END-IF
            END-IF.
 
-       API-SALE.
+      * POST /api/sale
+      * Request body:
+      * {
+      *   "member_id": 321,
+      *   "buystring": "kresten beer:3",
+      *   "room": 10
+      * }
+      * Response:
+      * {
+      *   "status": 200,
+      *   "msg": "OK",
+      *   "values": {
+      *     "order": {
+      *       "room": 10,
+      *       "member": 321,
+      *       "created_on": "2024-05-12T18:26:09.508Z",
+      *       "items": [
+      *         123,
+      *         123,
+      *         123
+      *       ]
+      *     },
+      *     "promille": 0.2,
+      *     "is_ballmer_peaking": false,
+      *     "bp_minutes": null,
+      *     "bp_seconds": null,
+      *     "caffeine": 2,
+      *     "cups": 4,
+      *     "product_contains_caffeine": true,
+      *     "is_coffee_master": false,
+      *     "cost": 1800,
+      *     "give_multibuy_hint": true,
+      *     "sale_hints":
+      *       "<span class=\"username\">kresten</span> 123:3",
+      *     "member_has_low_balance": false,
+      *     "member_balance": 182
+      *   }
+      * }
+       API-xPOST-SALE.
            IF api-log-level >= 1
                DISPLAY "Creating sale for room " api-room-id "..."
            END-IF
@@ -230,9 +334,9 @@
       *    Build buystring: username + space + product-id
            MOVE SPACES TO buystring
            STRING
-               api-username DELIMITED BY SIZE
+               FUNCTION TRIM(api-username) DELIMITED BY SIZE
                " " DELIMITED BY SIZE
-               api-product-id DELIMITED BY SIZE
+               FUNCTION TRIM(api-product-id) DELIMITED BY SIZE
                INTO buystring
            END-STRING
 
@@ -241,7 +345,7 @@
            MOVE SPACES TO req-body
            STRING
                '{"member_id":' DELIMITED BY SIZE
-               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
                ',"buystring":"' DELIMITED BY SIZE
                FUNCTION TRIM(buystring) DELIMITED BY SIZE
                '","room":' DELIMITED BY SIZE
@@ -262,15 +366,17 @@
 
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Sale created successfully"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Sale creation failed"
                END-IF
            END-IF.
 
-       API-TEST.
+       API-xGET-TEST.
            IF api-log-level >= 1
                DISPLAY "Calling test endpoint..."
            END-IF
@@ -287,10 +393,12 @@
 
            IF http-status = 0
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Test endpoint call successful"
                END-IF
            ELSE
                IF api-log-level >= 1
+                   DISPLAY " "
                    DISPLAY "Test endpoint call failed"
                END-IF
            END-IF.

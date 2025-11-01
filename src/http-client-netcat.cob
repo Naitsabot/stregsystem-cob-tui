@@ -17,7 +17,7 @@
        WORKING-STORAGE SECTION.
        01  crlf                 PIC X(2) VALUE X"0D0A".
        01  system-cmd           PIC X(2000).
-         01  system-cmd-full      PIC X(2200).
+       01  system-cmd-full      PIC X(4400).
        01  system-result        PIC S9(9) COMP-5.
        01  body-length          PIC 9(5).
        01  http-client-init-flag.
