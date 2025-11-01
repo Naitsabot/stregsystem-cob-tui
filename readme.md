@@ -174,3 +174,18 @@ COB_HTTP_CLIENT_LOG=2 ./build/test-api
 ```
 
 Note: the client reads the env var once when first used; set it before running the program.
+
+## Testing
+
+Run tests with:
+
+```bash
+make test
+```
+
+or inducivual test files:
+
+```bash
+make test-json
+make test-api
+```

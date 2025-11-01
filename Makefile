@@ -28,6 +28,8 @@ $(TEST_JSON_TARGET): $(TEST_JSON_SRC) $(API_SRC) $(HTTP_CLIENT_SRC)
 run: $(TARGET)
 	./$(TARGET)
 
+test: test-api test-json
+
 test-api: $(TEST_API_TARGET)
 	COB_HTTP_CLIENT_LOG=$(TEST_LOG) ./$(TEST_API_TARGET)
 
