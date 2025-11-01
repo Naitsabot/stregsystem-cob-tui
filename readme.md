@@ -42,15 +42,28 @@ params: [https://www.ibm.com/docs/en/db2/11.5.x?topic=routines-cobol-procedures]
 - TUI
   - SCREEN SECTION for defining display layouts
   - ACCEPT/DISPLAY with screen positioning
-- HTTP Communication
-  - COBOL is oooooooooold and does not support TCP
+- HTTP/1.1 Communication
+  - COBOL is oooooooooold and does not support TCP intrinsically
   - Options:
-    - Directly pass into shell and execute with GNU Netcat
+    - Directly pass into shell and execute with curl or another CLI HTTP client
+    - Use sockets via C bindings
     - File-based IPC
-    - ``CBL_SOCKET_*` with GnuCOBOL
+    - ``CBL_SOCKET_*` with GnuCOBOL if i can find it compiled with socket support
   - Implementing tcp sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
 - Project structure
   - The idea is that i can expand the TUI to fit more usecases, so a proper structure for the COBOL application needs to be in order
+  - Modularization
+    - Separate files for different modules
+    - Clear interfaces between modules
+- Build system
+  - Makefile to automate compilation and linking
+  - Handling dependencies
+- Testing
+  - Unit tests for individual modules
+  - Integration tests for the whole application
+- Documentation
+  - Code comments
+  - User manual for the TUI application
 
 ## Line Endings and Formatting
 
@@ -72,49 +85,49 @@ pre-commit run --files src/*.cob
 
 ## Installation
 
-### Installing GnuCOBOL, GNU Netcat
+### Installing GnuCOBOL and curl
 
-You need the GnuCOBOL compiler to build this project.
+You need the GnuCOBOL compiler to build this project and a CLI HTTP client such as `curl` for the curl-based HTTP client.
 
 #### Arch Linux
 
 ```bash
-yay -S gnucobol gnu-netcat
+yay -S gnucobol curl
 ```
 
 #### Debian/Ubuntu
 
 ```bash
 sudo apt-get update
-sudo apt-get install gnucobol gnu-netcat
+sudo apt-get install gnucobol curl
 ```
 
 #### Fedora/RHEL
 
 ```bash
-sudo dnf install gnucobol gnu-netcat
+sudo dnf install gnucobol curl
 ```
 
 #### macOS
 
 ```bash
-brew install gnucobol gnu-netcat
+brew install gnucobol curl
 ```
 
 #### From Source
 
 Download from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
 
-Download from [netcat.sourceforge.io](https://netcat.sourceforge.net/) and follow the build instructions in the tarball.
+Download curl from [https://curl.se/](https://curl.se/) or build from source if you need a custom build.
 
 **Verify installation:**
 
 ```bash
 cobc -v
-nc --version
+curl --version
 ```
 
-You should see version information if GnuCOBOL is installed correctly.
+You should see version information if GnuCOBOL and curl are installed correctly.
 
 ### Installing the TUI
 

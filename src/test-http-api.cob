@@ -85,7 +85,7 @@
            DISPLAY "Status: " api-response-status
            DISPLAY " "
 
-      *    Test: Fetch sales history of meber with id of "1"
+      *    Test: Fetch sales history of member with id of "1"
            DISPLAY "Test: GET /api/member/sales?member_id={member_id}"
                    " (1, tester)"
 

@@ -4,8 +4,7 @@
       * Description:
       *     Generic HTTP client that can be called from other programs
       *     Supports GET and POST methods
-      *     Natcat implementation, with host and port specification
-      *     (*Deprecated*, but interesting)
+      *     Curl implementation, with URL specification
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. HTTP-CLIENT.
@@ -30,9 +29,9 @@
        LINKAGE SECTION.
        01  http-request-data.
            05  req-method       PIC X(10).
-           05  req-host         PIC X(100). *> Dep. used for nc
-           05  req-port         PIC X(4). *> Dep. used for nc
-           05  req-url          PIC X(200). *> used for curl
+           05  req-host         PIC X(100). *> Dep.
+           05  req-port         PIC X(4). *> Dep.
+           05  req-url          PIC X(200).
            05  req-path         PIC X(200).
            05  req-body         PIC X(1000).
        01  http-response-status PIC S9(9) COMP-5.
@@ -60,16 +59,11 @@
        EXECUTE-GET-REQUEST.
            MOVE SPACES TO system-cmd
            STRING
-               "printf '"
-               FUNCTION TRIM(req-method) " "
-               FUNCTION TRIM(req-path) " HTTP/1.1" crlf
-               "Host: " FUNCTION TRIM(req-host) crlf
-               "User-Agent: COBOL-HTTP-Client/1.0" crlf
-               "Accept: */*" crlf
-               "Connection: close" crlf
-               crlf "' | "
-               "nc '" FUNCTION TRIM(req-host) "' '"
-               FUNCTION TRIM(req-port) "'"
+               "curl -X 'GET' '"
+               FUNCTION TRIM(req-url)
+               FUNCTION TRIM(req-path)
+               DELIMITED BY SIZE "' "
+               "-H 'accept: application/json'"
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
@@ -120,19 +114,13 @@
            MOVE SPACES TO system-cmd
 
            STRING
-               "printf '"
-               FUNCTION TRIM(req-method) " "
-               FUNCTION TRIM(req-path) " HTTP/1.1" crlf
-               "Host: " FUNCTION TRIM(req-host) crlf
-               "User-Agent: COBOL-HTTP-Client/1.0" crlf
-               "Accept: */*" crlf
-               "Content-Type: application/x-www-form-urlencoded" crlf
-               "Content-Length: " body-length crlf
-               "Connection: close" crlf
-               crlf
-               FUNCTION TRIM(req-body) "' | "
-               "nc '" FUNCTION TRIM(req-host) "' '"
-               FUNCTION TRIM(req-port) "'"
+               "curl -X 'POST' '"
+               FUNCTION TRIM(req-url)
+               FUNCTION TRIM(req-path)
+               DELIMITED BY SIZE "' "
+               "-H 'accept: application/json' "
+               "-H 'Content-Type: application/json' "
+               "-d '" FUNCTION TRIM(req-body) "'"
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING

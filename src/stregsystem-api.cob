@@ -19,8 +19,9 @@
       * HTTP client request structure
        01  http-request.
            05  req-method       PIC X(10).
-           05  req-host         PIC X(100).
-           05  req-port         PIC X(4).
+           05  req-host         PIC X(100). *> Dep. nc
+           05  req-port         PIC X(4). *> Dep. nc
+           05  req-url          PIC X(200).
            05  req-path         PIC X(200).
            05  req-body         PIC X(1000).
        01  http-status          PIC S9(9) COMP-5.
@@ -33,8 +34,9 @@
            05  api-env-val      PIC X(10).
 
       * API configuration
-       01  api-host             PIC X(100) VALUE "127.0.0.1".
-       01  api-port             PIC X(4) VALUE "8000".
+       01  api-host             PIC X(100) VALUE "127.0.0.1". *> Dep.
+       01  api-port             PIC X(4) VALUE "8000". *> Dep.
+       01  api-url              PIC X(200) VALUE"http://localhost:8000".
 
        LINKAGE SECTION.
        01  api-request-data.
@@ -85,7 +87,7 @@
 
       * GET /api/products/active_products?room_id={room_id}
       * Request: room_id via query parameter
-      * Response: disctionary of active products for the room
+      * Response: dictionary of active products for the room
       * {
       *   "123": {
       *     "name": "Beer",
@@ -101,20 +103,26 @@
                DISPLAY "Fetching active products for room "
                api-room-id "..."
            END-IF
+
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
-           STRING "/api/products/active_products?room_id="
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
+           STRING
+               "/api/products/active_products?room_id="
                FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
                INTO req-path
            END-STRING
            MOVE SPACES TO req-body
+
            IF api-log-level >= 2
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
+
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
            MOVE http-status TO api-response-status
+
            IF http-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
@@ -138,17 +146,22 @@
            IF api-log-level >= 1
                DISPLAY "Fetching named products..."
            END-IF
+
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
            MOVE "/api/products/named_products" TO req-path
            MOVE SPACES TO req-body
+
            IF api-log-level >= 2
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
+
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
            MOVE http-status TO api-response-status
+
            IF http-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
@@ -172,20 +185,25 @@
                DISPLAY "Fetching member id for username "
                api-username "..."
            END-IF
+
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
            STRING "/api/member/get_id?username="
                FUNCTION TRIM(api-username) DELIMITED BY SIZE
                INTO req-path
            END-STRING
            MOVE SPACES TO req-body
+
            IF api-log-level >= 2
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
+
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
            MOVE http-status TO api-response-status
+
            IF http-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
@@ -212,20 +230,25 @@
                DISPLAY "Fetching member info for id "
                        api-member-id "..."
            END-IF
+
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
            STRING "/api/member?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
                INTO req-path
            END-STRING
            MOVE SPACES TO req-body
+
            IF api-log-level >= 2
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
+
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
            MOVE http-status TO api-response-status
+
            IF http-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
@@ -255,20 +278,25 @@
                DISPLAY "Fetching sales for member id "
                        api-member-id "..."
            END-IF
+
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
            STRING "/api/member/sales?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
                INTO req-path
            END-STRING
            MOVE SPACES TO req-body
+
            IF api-log-level >= 2
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
+
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
            MOVE http-status TO api-response-status
+
            IF http-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
@@ -328,8 +356,9 @@
            MOVE "/api/sale" TO req-path
 
            MOVE "POST" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
 
       *    Build buystring: username + space + product-id
            MOVE SPACES TO buystring
@@ -361,7 +390,6 @@
 
            CALL "HTTP-CLIENT" USING http-request http-status
            END-CALL
-
            MOVE http-status TO api-response-status
 
            IF http-status = 0
@@ -381,14 +409,14 @@
                DISPLAY "Calling test endpoint..."
            END-IF
            MOVE "GET" TO req-method
-           MOVE api-host TO req-host
-           MOVE api-port TO req-port
+      *     MOVE api-host TO req-host
+      *     MOVE api-port TO req-port
+           MOVE api-url TO req-url
            MOVE "/test" TO req-path
            MOVE SPACES TO req-body
 
            CALL "HTTP-CLIENT" USING http-request http-status
-               END-CALL
-
+           END-CALL
            MOVE http-status TO api-response-status
 
            IF http-status = 0
@@ -421,4 +449,4 @@
                MOVE 0 TO api-log-level
            END-IF
            MOVE 1 TO api-init-done
-           .
+           . *> end of function
