@@ -28,7 +28,13 @@
            05  env-val          PIC X(10).
 
        LINKAGE SECTION.
-       COPY "copybooks/http-request.cpy".
+       01  http-request-data.
+           05  req-method       PIC X(10).
+           05  req-url          PIC X(200).
+           05  req-host         PIC X(100).
+           05  req-port         PIC X(10).
+           05  req-path         PIC X(200).
+           05  req-body         PIC X(1000).
        01  http-response-status PIC S9(9) COMP-5.
 
        PROCEDURE DIVISION USING http-request-data
