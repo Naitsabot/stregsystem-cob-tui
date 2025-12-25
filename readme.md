@@ -101,26 +101,8 @@ You need the GnuCOBOL compiler to build this project and a CLI HTTP client, here
 #### Arch Linux
 
 ```bash
-yay -S gnucobol curl
-```
-
-#### Debian/Ubuntu
-
-```bash
-sudo apt-get update
-sudo apt-get install gnucobol curl
-```
-
-#### Fedora/RHEL
-
-```bash
-sudo dnf install gnucobol curl
-```
-
-#### macOS
-
-```bash
-brew install gnucobol curl
+yay -S gnucobol
+pacman -S curl
 ```
 
 #### From Source
