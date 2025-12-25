@@ -87,10 +87,17 @@ pre-commit run --files src/*.cob
 
 ### Progress
 
-- [ ] Basic TUI layout with SCREEN SECTION
+- [ ] TUI
+  - [ ] The bare necessary TUI layout with SCREEN SECTION
+  - [ ] A better menued TUI layout with SCREEN SECTION
 - [x] HTTP/1.1 client integrated with stregsystem API
+  - [x] System executable HTTP client implementation
+  - [ ] COBOL tcp HTTP client (if feasible)
 - [ ] JSON parsing and serialization
-- [ ] COBOL tcp HTTP client (if feasible)
+
+#### HTTP/1.1 client
+
+As of now, two implementations have been made: One using netcat and the current using curl. The reason for the shift from nc to curl is that nc operates in the transportation layer while curl operates in the application layer, and the project already uses an out of the box implementation of an http client, so this makes it easier to implement.
 
 ## Installation
 
@@ -148,6 +155,8 @@ or inducivual test files:
 make test-json
 make test-api
 ```
+
+Api tests: `Status: +0000000000` = good
 
 #### HTTP client logging (verbosity)
 

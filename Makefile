@@ -1,5 +1,5 @@
 COB=cobc
-COBFLAGS=-Wall -x
+COBFLAGS=-Wall -x -I src
 MAIN_SRC=src/main.cob
 HELPER_SRC=src/helper.cob
 HTTP_CLIENT_SRC=src/http-client-curl.cob

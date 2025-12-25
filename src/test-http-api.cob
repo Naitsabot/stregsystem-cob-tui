@@ -14,13 +14,8 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  api-request-data.
-           05  api-operation    PIC X(20).
-           05  api-member-id    PIC X(5).
-           05  api-room-id      PIC X(5).
-           05  api-product-id   PIC X(5).
-           05  api-username     PIC X(30).
-       01  api-response-status  PIC S9(9) COMP-5.
+       COPY "copybooks/api-request.cpy".
+       COPY "copybooks/api-response.cpy".
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.

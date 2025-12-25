@@ -17,14 +17,8 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
       * HTTP client request structure
-       01  http-request.
-           05  req-method       PIC X(10).
-           05  req-host         PIC X(100). *> Dep. nc
-           05  req-port         PIC X(4). *> Dep. nc
-           05  req-url          PIC X(200).
-           05  req-path         PIC X(200).
-           05  req-body         PIC X(1000).
-       01  http-status          PIC S9(9) COMP-5.
+       COPY "copybooks/http-request.cpy".
+       COPY "copybooks/http-response-status.cpy".
        01  buystring            PIC X(100).
 
       * logging control
@@ -39,19 +33,14 @@
        01  api-url              PIC X(200) VALUE"http://localhost:8000".
 
        LINKAGE SECTION.
-       01  api-request-data.
-           05  api-operation    PIC X(20).
-           05  api-member-id    PIC X(5).
-           05  api-room-id      PIC X(5).
-           05  api-product-id   PIC X(5).
-           05  api-username     PIC X(30).
-       01  api-response-status  PIC S9(9) COMP-5.
+       COPY "copybooks/api-request.cpy".
+       COPY "copybooks/api-response.cpy".
 
        PROCEDURE DIVISION USING api-request-data
                                 api-response-status.
 
        MAIN-LOGIC.
-           MOVE SPACE TO http-request
+           MOVE SPACE TO http-request-data
            IF api-init-done = 0
                PERFORM INIT-LOGGING
            END-IF
@@ -119,11 +108,13 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Active products fetched successfully"
@@ -158,11 +149,13 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Named products fetched successfully"
@@ -200,11 +193,13 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member id fetched successfully"
@@ -245,11 +240,13 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member info fetched successfully"
@@ -293,11 +290,13 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member sales fetched successfully"
@@ -388,11 +387,13 @@
                DISPLAY "Request body: " FUNCTION TRIM(req-body)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Sale created successfully"
@@ -415,11 +416,13 @@
            MOVE "/test" TO req-path
            MOVE SPACES TO req-body
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Test endpoint call successful"
