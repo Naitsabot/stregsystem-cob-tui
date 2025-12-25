@@ -23,6 +23,7 @@
       *             (reduces overhead, removed HTTP build painpoint).
       *     a0.3.0: Beginning of JSON encoding and decoding.
       *     a0.3.1: Introduces copybooks for linkage sections.
+      *     a0.3.2: Fix configurations. Added enc support.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

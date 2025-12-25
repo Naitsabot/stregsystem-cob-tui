@@ -3,8 +3,6 @@
       *          stregsystem-api.cob (WS)
        01  http-request-data.
            05  req-method       PIC X(10).
-           05  req-host         PIC X(100). *> Dep. nc
-           05  req-port         PIC X(4). *> Dep. nc
            05  req-url          PIC X(200).
            05  req-path         PIC X(200).
            05  req-body         PIC X(1000).

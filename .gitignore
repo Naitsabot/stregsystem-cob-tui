@@ -48,3 +48,6 @@ core.*
 *.project
 *.classpath
 *.settings/
+
+# Environment configuration
+.env

@@ -13,6 +13,15 @@ TEST_JSON_TARGET=build/test-json
 # Logging level for tests: 0=none, 1=minimal, 2=verbose
 TEST_LOG ?= 0
 
+# Load environment variables from .env file if it exists, otherwise use .env.example
+ifneq (,$(wildcard .env))
+	include .env
+	export
+else ifneq (,$(wildcard .env.example))
+	include .env.example
+	export
+endif
+
 $(TARGET): $(MAIN_SRC) $(HELPER_SRC) $(HTTP_CLIENT_SRC)
 	mkdir -p build
 	$(COB) $(COBFLAGS) -o $(TARGET) $(MAIN_SRC) $(HELPER_SRC) $(HTTP_CLIENT_SRC)

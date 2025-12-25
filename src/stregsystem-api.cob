@@ -28,9 +28,7 @@
            05  api-env-val      PIC X(10).
 
       * API configuration
-       01  api-host             PIC X(100) VALUE "127.0.0.1". *> Dep.
-       01  api-port             PIC X(4) VALUE "8000". *> Dep.
-       01  api-url              PIC X(200) VALUE"http://localhost:8000".
+       01  api-url              PIC X(200).
 
        LINKAGE SECTION.
        COPY "copybooks/api-request.cpy".
@@ -43,6 +41,7 @@
            MOVE SPACE TO http-request-data
            IF api-init-done = 0
                PERFORM INIT-LOGGING
+               PERFORM INIT-API-CONFIG
            END-IF
 
 
@@ -94,8 +93,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING
                "/api/products/active_products?room_id="
@@ -139,8 +136,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            MOVE "/api/products/named_products" TO req-path
            MOVE SPACES TO req-body
@@ -180,8 +175,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member/get_id?username="
                FUNCTION TRIM(api-username) DELIMITED BY SIZE
@@ -227,8 +220,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
@@ -277,8 +268,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member/sales?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
@@ -355,8 +344,6 @@
            MOVE "/api/sale" TO req-path
 
            MOVE "POST" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
 
       *    Build buystring: username + space + product-id
@@ -410,8 +397,6 @@
                DISPLAY "Calling test endpoint..."
            END-IF
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            MOVE "/test" TO req-path
            MOVE SPACES TO req-body
@@ -453,3 +438,10 @@
            END-IF
            MOVE 1 TO api-init-done
            . *> end of function
+
+       INIT-API-CONFIG.
+      *    Read environment variable for API configuration
+           ACCEPT api-url FROM ENVIRONMENT "STREGSYSTEM_URL"
+           IF api-url = SPACES
+               MOVE "http://localhost:8000" TO api-url
+           END-IF.
