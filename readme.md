@@ -106,32 +106,11 @@ As of now, two implementations have been made: One using netcat and the current 
 #### JSON Encoding and Decoding
 
 **Encoding:** Simple string concatenation in COBOL (see [json.cob](src/json.cob))
-**Decoding:** Uses `jq.exe` as external JSON parser (see [json-decoder.cob](src/json-decoder.cob))
+**Decoding:** Uses `jq` as external JSON parser (see [json-decoder.cob](src/json-decoder.cob))
 
-The implementation is API-specific for the stregsystem endpoints. See [JSON Implementation Guide](docs/JSON-IMPLEMENTATION.md) for details.
-
-**Quick Setup:**
-```powershell
-# Install jq (Windows)
-.\setup-json.ps1
-
-# Or manually
-choco install jq
-
-# Test
-make test-json-full
-```
-
-See [JSON Quick Reference](docs/JSON-QUICK-REFERENCE.md) for usage examples.
+The implementation is API-specific for the stregsystem endpoints.
 
 ## Installation
-
-### Prerequisites
-
-You need:
-- **GnuCOBOL** compiler
-- **curl** for HTTP client
-- **jq** for JSON decoding
 
 ### Installing GnuCOBOL, curl, jq
 
@@ -162,33 +141,9 @@ jq --version
 
 You should see version information if all tools are installed correctly.
 
-### Installing jq (JSON decoder)
+### Installing the TUI
 
-**Windows:**
-```powershell
-# Automated setup
-.\setup-json.ps1
-
-# Or using Chocolatey
-choco install jq
-
-# Or using Scoop
-scoop install jq
-```
-
-**Linux:**
-```bash
-# Arch/Manjaro
-pacman -S jq
-
-# Ubuntu/Debian
-apt install jq
-```ividual test files:
-
-```bash
-make test-json       # Test basic JSON (older)
-make test-json-full  # Test full JSON encoder/decoder
-make test-api        # Test API integrationed yet. When it is, there will probably be a package or install script here.
+Not implemented yet. When it is, there will probably be a package or install script here.
 
 `¯\_(ツ)_/¯`
 
@@ -208,11 +163,12 @@ Run tests with:
 make test
 ```
 
-or inducivual test files:
+or individual test files:
 
 ```bash
-make test-json
-make test-api
+make test-json       # Test basic JSON (older)
+make test-json-full  # Test full JSON encoder/decoder
+make test-api        # Test API integration
 ```
 
 Api tests: `Status: +0000000000` = good

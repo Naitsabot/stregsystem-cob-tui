@@ -31,10 +31,10 @@
        01  jq-filter            PIC X(512).
        01  jq-executable        PIC X(100) VALUE "jq".
        01  jq-result            PIC S9(9) COMP-5.
-       01  temp-output-file     PIC X(100) 
+       01  temp-output-file     PIC X(100)
            VALUE "temp-json-output.txt".
        01  temp-json-escaped    PIC X(8192).
-       
+
       * String processing for escaping
        01  src-pos              PIC 9(5) COMP-5.
        01  dest-pos             PIC 9(5) COMP-5.
@@ -50,13 +50,13 @@
        LINKAGE SECTION.
       * Input: JSON string to parse
        01  json-input-data      PIC X(8192).
-      
+
       * Input: Parse operation type
        01  parse-operation      PIC X(20).
-      
+
       * Output: Parsed data (structure depends on operation)
        01  parsed-output-data   PIC X(2048).
-      
+
       * Output: Status code
        01  parse-status         PIC S9(9) COMP-5.
 
@@ -95,15 +95,13 @@
 
            GOBACK.
 
-      ******************************************************************
       * INIT-LOGGING - Initialize logging configuration
-      ******************************************************************
        INIT-LOGGING.
            ACCEPT decoder-env-val FROM ENVIRONMENT "LOG_LEVEL"
            IF decoder-env-val = SPACE OR LOW-VALUE
                MOVE 0 TO decoder-log-level
            ELSE
-               MOVE FUNCTION NUMVAL(decoder-env-val) 
+               MOVE FUNCTION NUMVAL(decoder-env-val)
                    TO decoder-log-level
            END-IF
            MOVE 1 TO decoder-init-done
@@ -112,58 +110,50 @@
                        decoder-log-level
            END-IF.
 
-      ******************************************************************
       * PARSE-MEMBER-ID - Extract member_id from response
       * Example: {"member_id": 321}
-      ******************************************************************
        PARSE-MEMBER-ID.
            MOVE ".member_id" TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
                IF decoder-log-level >= 2
-                   DISPLAY "Parsed member_id: " 
+                   DISPLAY "Parsed member_id: "
                        FUNCTION TRIM(parsed-output-data)
                END-IF
            END-IF.
 
-      ******************************************************************
       * PARSE-MEMBER-INFO - Extract member info from response
-      * Example: {"balance": 20000, "username": "kresten", 
+      * Example: {"balance": 20000, "username": "kresten",
       *           "active": true, "name": "Kresten Laust"}
       * Returns: balance<TAB>username<TAB>active<TAB>name
-      ******************************************************************
        PARSE-MEMBER-INFO.
            MOVE '"\(.balance)\t\(.username)\t\(.active)\t\(.name)"'
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
                IF decoder-log-level >= 2
-                   DISPLAY "Parsed member info: " 
+                   DISPLAY "Parsed member info: "
                        FUNCTION TRIM(parsed-output-data)
                END-IF
            END-IF.
 
-      ******************************************************************
       * PARSE-BALANCE - Extract balance from response
       * Example: {"balance": 20000}
-      ******************************************************************
        PARSE-BALANCE.
            MOVE ".balance" TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
                IF decoder-log-level >= 2
-                   DISPLAY "Parsed balance: " 
+                   DISPLAY "Parsed balance: "
                        FUNCTION TRIM(parsed-output-data)
                END-IF
            END-IF.
 
-      ******************************************************************
       * PARSE-ACTIVE-PRODUCTS - Extract active products
       * Example: {"123": {"name": "Beer", "price": 600}}
       * Returns: List of product_id<TAB>name<TAB>price (one per line)
-      ******************************************************************
        PARSE-ACTIVE-PRODUCTS.
-           STRING 
+           STRING
                'to_entries | .[] | "\(.key)\t\(.value.name)\t'
                '\(.value.price)"'
                DELIMITED BY SIZE
@@ -176,11 +166,9 @@
                END-IF
            END-IF.
 
-      ******************************************************************
       * PARSE-NAMED-PRODUCTS - Extract named products
       * Example: {"beer": 123}
       * Returns: List of name<TAB>product_id (one per line)
-      ******************************************************************
        PARSE-NAMED-PRODUCTS.
            MOVE 'to_entries | .[] | "\(.key)\t\(.value)"'
                TO jq-filter
@@ -191,27 +179,21 @@
                END-IF
            END-IF.
 
-      ******************************************************************
       * PARSE-SALE-RESULT - Extract sale result
       * Returns sale status and details
-      ******************************************************************
        PARSE-SALE-RESULT.
       *    For now, just return the whole JSON as-is
       *    TODO: Parse specific fields when sale structure is known
            MOVE FUNCTION TRIM(json-input-data) TO parsed-output-data
            MOVE 0 TO parse-status.
 
-      ******************************************************************
       * PARSE-GENERIC-VALUE - Extract a simple value
       * Generic parser for simple key-value extraction
-      ******************************************************************
        PARSE-GENERIC-VALUE.
            MOVE "." TO jq-filter
            PERFORM EXECUTE-JQ.
 
-      ******************************************************************
       * EXECUTE-JQ - Execute jq command with current filter
-      ******************************************************************
        EXECUTE-JQ.
       *    Escape single quotes in JSON for shell
            PERFORM ESCAPE-JSON-FOR-SHELL
@@ -247,23 +229,21 @@
       *    Read output from temp file
            PERFORM READ-OUTPUT-FROM-FILE.
 
-      ******************************************************************
       * ESCAPE-JSON-FOR-SHELL - Escape single quotes in JSON
       * Replaces ' with '\'' for safe shell execution in bash
-      ******************************************************************
        ESCAPE-JSON-FOR-SHELL.
            MOVE SPACES TO temp-json-escaped
            MOVE 1 TO src-pos
            MOVE 1 TO dest-pos
-           MOVE FUNCTION LENGTH(FUNCTION TRIM(json-input-data)) 
+           MOVE FUNCTION LENGTH(FUNCTION TRIM(json-input-data))
                TO src-len
-           
+
            PERFORM UNTIL src-pos > src-len
                MOVE json-input-data(src-pos:1) TO current-char
-               
+
                IF current-char = "'"
       *            Replace ' with '\''
-                   STRING 
+                   STRING
                        "'\\''" DELIMITED BY SIZE
                        INTO temp-json-escaped
                        WITH POINTER dest-pos
@@ -272,16 +252,14 @@
                    MOVE current-char TO temp-json-escaped(dest-pos:1)
                    ADD 1 TO dest-pos
                END-IF
-               
+
                ADD 1 TO src-pos
            END-PERFORM.
 
-      ******************************************************************
       * READ-OUTPUT-FROM-FILE - Read jq output from temp file
-      ******************************************************************
        READ-OUTPUT-FROM-FILE.
            OPEN INPUT JSON-OUTPUT
-           
+
       *    Read first line (for simple values)
            READ JSON-OUTPUT
                AT END
@@ -290,14 +268,14 @@
                    CLOSE JSON-OUTPUT
                    GOBACK
            END-READ
-           
+
            MOVE FUNCTION TRIM(JSON-OUTPUT-LINE) TO parsed-output-data
-           
+
            IF decoder-log-level >= 3
-               DISPLAY "Read output: " 
+               DISPLAY "Read output: "
                    FUNCTION TRIM(parsed-output-data)
            END-IF
-           
+
            CLOSE JSON-OUTPUT.
 
        END PROGRAM JSON-DECODER.

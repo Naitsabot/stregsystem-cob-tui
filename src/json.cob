@@ -56,15 +56,13 @@
 
            GOBACK.
 
-      ******************************************************************
       * ENCODE-SALE-REQUEST - Build JSON for POST /api/sale
-      * Input format: member_id|buystring (pipe-delimited)
+      * Input format: member_id<TAB>buystring (tab-delimited)
       * Output: {"member_id": 123, "buystring": "beer"}
-      ******************************************************************
        ENCODE-SALE-REQUEST.
            MOVE SPACES TO json-output
            MOVE SPACES TO temp-string
-           UNSTRING input-data DELIMITED BY "|"
+           UNSTRING input-data DELIMITED BY X"09"
                INTO temp-string(1:50)
                     temp-string(51:200)
            END-UNSTRING
@@ -78,15 +76,13 @@
                INTO json-output
            END-STRING.
 
-      ******************************************************************
       * ENCODE-SIMPLE-OBJECT - Generic single key-value JSON
-      * Input format: key|value (pipe-delimited)
+      * Input format: key<TAB>value (tab-delimited)
       * Output: {"key": "value"}
-      ******************************************************************
        ENCODE-SIMPLE-OBJECT.
            MOVE SPACES TO json-output
            MOVE SPACES TO temp-string
-           UNSTRING input-data DELIMITED BY "|"
+           UNSTRING input-data DELIMITED BY X"09"
                INTO temp-string(1:50)
                     temp-string(51:200)
            END-UNSTRING
