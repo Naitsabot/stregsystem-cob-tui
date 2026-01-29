@@ -49,3 +49,4 @@ test-json: $(TEST_JSON_TARGET)
 
 clean:
 	rm -rf build
+	rm -f temp-json-output.txt
