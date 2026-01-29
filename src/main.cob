@@ -2,7 +2,7 @@
       * Author: Naitsabot
       * Description:
       *     Stregsystem TUI written in GnuCOBOL
-      * Version: a0.3.0
+      * Version: a0.3.3
       * Version history:
       *     a0.0.1: Initial commit, basic program.
       *     a0.0.2: Working basic program, and helper file corrected.
@@ -24,6 +24,7 @@
       *     a0.3.0: Beginning of JSON encoding and decoding.
       *     a0.3.1: Introduces copybooks for linkage sections.
       *     a0.3.2: Fix configurations. Added enc support.
+      *     a0.3.3: Added JSON encoding and decoding tests.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
