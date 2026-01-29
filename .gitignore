@@ -51,3 +51,7 @@ core.*
 
 # Environment configuration
 .env
+
+# Human readable files
+*.json
+*.txt

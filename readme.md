@@ -69,7 +69,7 @@ pre-commit run --files src/*.cob
     - ``CBL_SOCKET_*` with GnuCOBOL if i can find it compiled with socket support
     - Implementing TCP in COBOL sounds interesting [https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/](https://sourceforge.net/p/gnucobol/discussion/contrib/thread/2b474086/) [https://github.com/OCamlPro/gnucobol-contrib/](https://github.com/OCamlPro/gnucobol-contrib/) [https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket](https://github.com/OCamlPro/gnucobol-contrib/tree/master/samples/socket)
 - DATA handling
-  - JSON encoding/decoding [https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/](https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/) [https://learnxbyexample.com/cobol/json/](https://learnxbyexample.com/cobol/json/)
+  - JSON encoding/decoding [https://eklausmeier.goip.de/blog/2021/08-17-generating-json-with-cobol/](https://eklausmeier.goip.de/blog/2021/08-17-generating-json-with-cobol/) [https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/](https://compile7.org/serialize-and-deserialize/how-to-serialize-and-deserialize-json-in-gnucobol-cgi/) [https://learnxbyexample.com/cobol/json/](https://learnxbyexample.com/cobol/json/)
   - Nothing is saved locally; all data is fetched from the API on demand
 - Project structure
   - Needs to be expandable for multiple use cases
@@ -93,43 +93,102 @@ pre-commit run --files src/*.cob
 - [x] HTTP/1.1 client integrated with stregsystem API
   - [x] System executable HTTP client implementation
   - [ ] COBOL tcp HTTP client (if feasible)
-- [ ] JSON parsing and serialization
+- [x] JSON parsing and serialization
+  - [x] JSON encoding using manual string building
+  - [x] JSON decoding using jq.exe external parser
+  - [ ] JSON generation using JSON GENERATE (optional enhancement)
+  - [ ] JSON parsing using JSON PARSE (unsupported by gnuCOBOL :((( )
 
 #### HTTP/1.1 client
 
 As of now, two implementations have been made: One using netcat and the current using curl. The reason for the shift from nc to curl is that nc operates in the transportation layer while curl operates in the application layer, and the project already uses an out of the box implementation of an http client, so this makes it easier to implement.
 
+#### JSON Encoding and Decoding
+
+**Encoding:** Simple string concatenation in COBOL (see [json.cob](src/json.cob))
+**Decoding:** Uses `jq.exe` as external JSON parser (see [json-decoder.cob](src/json-decoder.cob))
+
+The implementation is API-specific for the stregsystem endpoints. See [JSON Implementation Guide](docs/JSON-IMPLEMENTATION.md) for details.
+
+**Quick Setup:**
+```powershell
+# Install jq (Windows)
+.\setup-json.ps1
+
+# Or manually
+choco install jq
+
+# Test
+make test-json-full
+```
+
+See [JSON Quick Reference](docs/JSON-QUICK-REFERENCE.md) for usage examples.
+
 ## Installation
 
-### Installing GnuCOBOL and curl
+### Prerequisites
 
-You need the GnuCOBOL compiler to build this project and a CLI HTTP client, here `curl`, for the curl-based HTTP client.
+You need:
+- **GnuCOBOL** compiler
+- **curl** for HTTP client
+- **jq** for JSON decoding
+
+### Installing GnuCOBOL, curl, jq
+
+You need the GnuCOBOL compiler to build this project and a CLI HTTP client, here `curl`, for the curl-based HTTP client. JQ because im lazy and dont want to build a parser...
 
 #### Arch Linux
 
 ```bash
 yay -S gnucobol
-pacman -S curl
+pacman -S curl jq
 ```
 
 #### From Source
 
-Download from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
+Download GnuCOBOL compiler from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
 
-Download curl from [https://curl.se/](https://curl.se/) or build from source if you need a custom build.
+Download curl from [https://curl.se/](https://curl.se/) and build.
+
+Download jq from [https://jqlang.org/](https://jqlang.org/) and build.
 
 **Verify installation:**
 
 ```bash
 cobc -v
 curl --version
+jq --version
 ```
 
-You should see version information if GnuCOBOL and curl are installed correctly.
+You should see version information if all tools are installed correctly.
 
-### Installing the TUI
+### Installing jq (JSON decoder)
 
-Not implemented yet. When it is, there will probably be a package or install script here.
+**Windows:**
+```powershell
+# Automated setup
+.\setup-json.ps1
+
+# Or using Chocolatey
+choco install jq
+
+# Or using Scoop
+scoop install jq
+```
+
+**Linux:**
+```bash
+# Arch/Manjaro
+pacman -S jq
+
+# Ubuntu/Debian
+apt install jq
+```ividual test files:
+
+```bash
+make test-json       # Test basic JSON (older)
+make test-json-full  # Test full JSON encoder/decoder
+make test-api        # Test API integrationed yet. When it is, there will probably be a package or install script here.
 
 `¯\_(ツ)_/¯`
 

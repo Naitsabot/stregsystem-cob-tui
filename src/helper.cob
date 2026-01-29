@@ -7,6 +7,7 @@
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. HELPER.
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
       * X(30) means a fixed-length alphanumeric string of 30 characters
