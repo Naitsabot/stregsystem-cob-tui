@@ -106,7 +106,7 @@
 
            IF test-status = 0
                DISPLAY "JSON Input: " FUNCTION TRIM(test-json-input)
-               DISPLAY "Parsed output (balance|username|active|name):"
+               DISPLAY "Parsed output (tab-delimited):"
                DISPLAY "  " FUNCTION TRIM(test-parsed-output)
                PERFORM PARSE-MEMBER-FIELDS
                DISPLAY "Status: SUCCESS"
@@ -130,7 +130,7 @@
 
            IF test-status = 0
                DISPLAY "JSON Input: " FUNCTION TRIM(test-json-input)
-               DISPLAY "Parsed products (id|name|price per line):"
+               DISPLAY "Parsed products (tab-delimited per line):"
                DISPLAY "  " FUNCTION TRIM(test-parsed-output)
                DISPLAY "Status: SUCCESS"
            ELSE
@@ -145,10 +145,10 @@
            STOP RUN.
 
       ******************************************************************
-      * PARSE-MEMBER-FIELDS - Parse pipe-delimited member info
+      * PARSE-MEMBER-FIELDS - Parse tab-delimited member info
       ******************************************************************
        PARSE-MEMBER-FIELDS.
-           UNSTRING test-parsed-output DELIMITED BY "|"
+           UNSTRING test-parsed-output DELIMITED BY X"09"
                INTO member-balance
                     member-username
                     member-active

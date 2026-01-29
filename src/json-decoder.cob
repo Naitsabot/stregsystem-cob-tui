@@ -16,33 +16,30 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT JSON-INPUT
-               ASSIGN TO "temp-json-input.json"
-               ORGANIZATION IS LINE SEQUENTIAL.
            SELECT JSON-OUTPUT
                ASSIGN TO "temp-json-output.txt"
                ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  JSON-INPUT.
-       01  JSON-INPUT-LINE      PIC X(4096).
-
        FD  JSON-OUTPUT.
        01  JSON-OUTPUT-LINE     PIC X(1024).
 
        WORKING-STORAGE SECTION.
       * JQ command configuration
-       01  jq-command           PIC X(2048).
+       01  jq-command           PIC X(8192).
        01  jq-filter            PIC X(512).
        01  jq-executable        PIC X(100) VALUE "jq".
        01  jq-result            PIC S9(9) COMP-5.
-       
-      * Temp file paths
-       01  temp-input-file      PIC X(100) 
-           VALUE "temp-json-input.json".
        01  temp-output-file     PIC X(100) 
            VALUE "temp-json-output.txt".
+       01  temp-json-escaped    PIC X(8192).
+       
+      * String processing for escaping
+       01  src-pos              PIC 9(5) COMP-5.
+       01  dest-pos             PIC 9(5) COMP-5.
+       01  src-len              PIC 9(5) COMP-5.
+       01  current-char         PIC X.
 
       * logging control
        01  logging-control.
@@ -133,10 +130,10 @@
       * PARSE-MEMBER-INFO - Extract member info from response
       * Example: {"balance": 20000, "username": "kresten", 
       *           "active": true, "name": "Kresten Laust"}
-      * Returns: balance|username|active|name (pipe-delimited)
+      * Returns: balance<TAB>username<TAB>active<TAB>name
       ******************************************************************
        PARSE-MEMBER-INFO.
-           MOVE '"\(.balance)|\(.username)|\(.active)|\(.name)"'
+           MOVE '"\(.balance)\t\(.username)\t\(.active)\t\(.name)"'
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
@@ -163,11 +160,11 @@
       ******************************************************************
       * PARSE-ACTIVE-PRODUCTS - Extract active products
       * Example: {"123": {"name": "Beer", "price": 600}}
-      * Returns: List of product_id|name|price (one per line)
+      * Returns: List of product_id<TAB>name<TAB>price (one per line)
       ******************************************************************
        PARSE-ACTIVE-PRODUCTS.
            STRING 
-               'to_entries | .[] | "\(.key)|\(.value.name)|'
+               'to_entries | .[] | "\(.key)\t\(.value.name)\t'
                '\(.value.price)"'
                DELIMITED BY SIZE
                INTO jq-filter
@@ -182,10 +179,10 @@
       ******************************************************************
       * PARSE-NAMED-PRODUCTS - Extract named products
       * Example: {"beer": 123}
-      * Returns: List of name|product_id (one per line)
+      * Returns: List of name<TAB>product_id (one per line)
       ******************************************************************
        PARSE-NAMED-PRODUCTS.
-           MOVE 'to_entries | .[] | "\(.key)|\(.value)"'
+           MOVE 'to_entries | .[] | "\(.key)\t\(.value)"'
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
@@ -216,27 +213,25 @@
       * EXECUTE-JQ - Execute jq command with current filter
       ******************************************************************
        EXECUTE-JQ.
-      *    Write JSON input to temp file
-           PERFORM WRITE-JSON-TO-FILE
-           IF parse-status NOT = 0
-               GOBACK
-           END-IF
+      *    Escape single quotes in JSON for shell
+           PERFORM ESCAPE-JSON-FOR-SHELL
 
-      *    Build jq command
+      *    Build jq command with echo pipe
            MOVE SPACES TO jq-command
            STRING
+               "echo '" DELIMITED BY SIZE
+               FUNCTION TRIM(temp-json-escaped) DELIMITED BY SIZE
+               "' | " DELIMITED BY SIZE
                jq-executable DELIMITED BY SPACE
                " -r '" DELIMITED BY SIZE
                FUNCTION TRIM(jq-filter) DELIMITED BY SIZE
-               "' " DELIMITED BY SIZE
-               temp-input-file DELIMITED BY SPACE
-               ' > ' DELIMITED BY SIZE
+               "' > " DELIMITED BY SIZE
                temp-output-file DELIMITED BY SPACE
                INTO jq-command
            END-STRING
 
            IF decoder-log-level >= 2
-               DISPLAY "Executing: " FUNCTION TRIM(jq-command)
+               DISPLAY "Executing jq filter: " FUNCTION TRIM(jq-filter)
            END-IF
 
       *    Execute jq command
@@ -253,17 +248,33 @@
            PERFORM READ-OUTPUT-FROM-FILE.
 
       ******************************************************************
-      * WRITE-JSON-TO-FILE - Write JSON input to temp file
+      * ESCAPE-JSON-FOR-SHELL - Escape single quotes in JSON
+      * Replaces ' with '\'' for safe shell execution in bash
       ******************************************************************
-       WRITE-JSON-TO-FILE.
-           OPEN OUTPUT JSON-INPUT
-           IF decoder-log-level >= 3
-               DISPLAY "Writing JSON to file: " 
-                   FUNCTION TRIM(json-input-data)
-           END-IF
-           MOVE json-input-data TO JSON-INPUT-LINE
-           WRITE JSON-INPUT-LINE
-           CLOSE JSON-INPUT.
+       ESCAPE-JSON-FOR-SHELL.
+           MOVE SPACES TO temp-json-escaped
+           MOVE 1 TO src-pos
+           MOVE 1 TO dest-pos
+           MOVE FUNCTION LENGTH(FUNCTION TRIM(json-input-data)) 
+               TO src-len
+           
+           PERFORM UNTIL src-pos > src-len
+               MOVE json-input-data(src-pos:1) TO current-char
+               
+               IF current-char = "'"
+      *            Replace ' with '\''
+                   STRING 
+                       "'\\''" DELIMITED BY SIZE
+                       INTO temp-json-escaped
+                       WITH POINTER dest-pos
+                   END-STRING
+               ELSE
+                   MOVE current-char TO temp-json-escaped(dest-pos:1)
+                   ADD 1 TO dest-pos
+               END-IF
+               
+               ADD 1 TO src-pos
+           END-PERFORM.
 
       ******************************************************************
       * READ-OUTPUT-FROM-FILE - Read jq output from temp file
