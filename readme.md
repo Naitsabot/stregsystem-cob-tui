@@ -166,9 +166,10 @@ make test
 or individual test files:
 
 ```bash
-make test-json       # Test basic JSON (older)
-make test-json-full  # Test full JSON encoder/decoder
-make test-api        # Test API integration
+make test-json          # Test basic JSON (older)
+make test-json-full     # Test full JSON encoder/decoder
+make test-api           # Test API integration
+make test-product-dict  # Test product dictionary
 ```
 
 Api tests: `Status: +0000000000` = good

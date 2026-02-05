@@ -21,6 +21,12 @@
        COPY "copybooks/http-response-status.cpy".
        01  buystring            PIC X(100).
 
+      * JSON decoder variables
+       01  json-input           PIC X(8192).
+       01  parse-operation      PIC X(20).
+       01  parsed-output        PIC X(2048).
+       01  parse-status         PIC S9(9) COMP-5.
+
       * logging control
        01  logging-control.
            05  api-init-done    PIC 9 VALUE 0.
@@ -35,7 +41,7 @@
        COPY "copybooks/api-response.cpy".
 
        PROCEDURE DIVISION USING api-request-data
-                                api-response-status.
+                                api-response-data.
 
        MAIN-LOGIC.
            MOVE SPACE TO http-request-data

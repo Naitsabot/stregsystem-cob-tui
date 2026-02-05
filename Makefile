@@ -8,9 +8,11 @@ JSON_ENCODER_SRC=src/json-encoder.cob
 JSON_DECODER_SRC=src/json-decoder.cob
 TEST_API_SRC=src/test-http-api.cob
 TEST_JSON_SRC=src/test-json.cob
+TEST_PRODUCT_DICT_SRC=src/test-product-dict.cob
 TARGET=build/app
 TEST_API_TARGET=build/test-api
 TEST_JSON_TARGET=build/test-json
+TEST_PRODUCT_DICT_TARGET=build/test-product-dict
 
 # Logging level for tests: 0=none, 1=minimal, 2=verbose
 TEST_LOG ?= 0
@@ -36,16 +38,23 @@ $(TEST_JSON_TARGET): $(TEST_JSON_SRC) $(JSON_ENCODER_SRC) $(JSON_DECODER_SRC)
 	mkdir -p build
 	$(COB) $(COBFLAGS) -o $(TEST_JSON_TARGET) $(TEST_JSON_SRC) $(JSON_ENCODER_SRC) $(JSON_DECODER_SRC)
 
+$(TEST_PRODUCT_DICT_TARGET): $(TEST_PRODUCT_DICT_SRC)
+	mkdir -p build
+	$(COB) $(COBFLAGS) -o $(TEST_PRODUCT_DICT_TARGET) $(TEST_PRODUCT_DICT_SRC)
+
 run: $(TARGET)
 	./$(TARGET)
 
-test: test-api test-json
+test: test-api test-json test-product-dict
 
 test-api: $(TEST_API_TARGET)
 	COB_HTTP_CLIENT_LOG=$(TEST_LOG) ./$(TEST_API_TARGET)
 
 test-json: $(TEST_JSON_TARGET)
 	LOG_LEVEL=$(TEST_LOG) ./$(TEST_JSON_TARGET)
+
+test-product-dict: $(TEST_PRODUCT_DICT_TARGET)
+	./$(TEST_PRODUCT_DICT_TARGET)
 
 clean:
 	rm -rf build
