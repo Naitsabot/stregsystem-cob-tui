@@ -14,12 +14,12 @@
        ADD-TO-DICTIONARY.
            SET dict-not-found TO TRUE
            SET dict-inserted TO TRUE
-           
+
       *    Check if product already exists
            PERFORM SEARCH-DICTIONARY
            IF dict-found
                IF api-log-level > 0
-                   DISPLAY "Product " dict-search-id 
+                   DISPLAY "Product " dict-search-id
                           " already in dictionary, updating..."
                END-IF
                MOVE dict-work-name TO dict-prod-name(dict-idx)
@@ -50,7 +50,7 @@
                    SET dict-inserted TO TRUE
                    IF api-log-level > 1
                        DISPLAY "Added product " dict-prod-id(dict-idx)
-                              " to dictionary (entry " 
+                              " to dictionary (entry "
                               dict-entry-count ")"
                    END-IF
                END-IF
@@ -66,7 +66,7 @@
        SEARCH-DICTIONARY.
            SET dict-not-found TO TRUE
            SET dict-idx TO 1
-           
+
            SEARCH dict-entries
                AT END
                    SET dict-not-found TO TRUE
@@ -88,7 +88,7 @@
        UPDATE-DICTIONARY-ENTRY.
       *    Entry already exists at dict-idx, just update it
       *    Product ID stays the same, update other fields as needed
-           
+
            IF api-log-level > 1
                DISPLAY "Updated product " dict-prod-id(dict-idx)
                       " in dictionary"
@@ -102,8 +102,8 @@
        CLEAR-DICTIONARY.
            MOVE 0 TO dict-entry-count
            MOVE SPACES TO dict-last-updated
-           
-           PERFORM VARYING dict-idx FROM 1 BY 1 
+
+           PERFORM VARYING dict-idx FROM 1 BY 1
                    UNTIL dict-idx > dict-max-entries
                MOVE SPACES TO dict-prod-id(dict-idx)
                MOVE SPACES TO dict-prod-name(dict-idx)
@@ -111,7 +111,7 @@
                MOVE 0 TO dict-is-active(dict-idx)
                MOVE SPACES TO dict-source(dict-idx)
            END-PERFORM
-           
+
            IF api-log-level > 0
                DISPLAY "Product dictionary cleared"
            END-IF
@@ -126,7 +126,7 @@
       ******************************************************************
        LOAD-PRODUCTS-TO-DICTIONARY.
            IF api-log-level > 0
-               DISPLAY "Loading " products-count 
+               DISPLAY "Loading " products-count
                       " products into dictionary..."
            END-IF
 
@@ -142,7 +142,7 @@
            END-PERFORM
 
            IF api-log-level > 0
-               DISPLAY "Dictionary now contains " 
+               DISPLAY "Dictionary now contains "
                       dict-entry-count " products"
            END-IF
            .
@@ -156,7 +156,7 @@
            DISPLAY "Entries: " dict-entry-count " / " dict-max-entries
            DISPLAY "Last Updated: " dict-last-updated
            DISPLAY " "
-           
+
            PERFORM VARYING dict-idx FROM 1 BY 1
                    UNTIL dict-idx > dict-entry-count
                DISPLAY "  [" dict-idx "] ID: " dict-prod-id(dict-idx)
