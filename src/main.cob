@@ -27,6 +27,7 @@
       *     a0.3.3: Added JSON encoding and decoding tests.
       *     a0.4.0: Integrate JSON encoding and decoding into API calls.
       *             decoding added. updated tests. added copybooks.
+      *     a0.4.1: Add simple screen section example.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -43,15 +44,19 @@
        01  user-choice          PIC 9.
        01  test-thing           PIC X(4) VALUE "8000".
 
+       SCREEN SECTION.
+       01  SIMPLE-SCREEN.
+           05 BLANK SCREEN.
+           05 LINE 2 COLUMN 5 VALUE "Screen section example".
+           05 LINE 4 COLUMN 5 VALUE "Press Enter to continue.".
+
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
            CALL "HELPER".
 
-           DISPLAY test-thing
-
            DISPLAY " "
            DISPLAY "1. Manual input test"
-           DISPLAY "2. Run HTTP tests"
+           DISPLAY "2. Run SCREEN SECTION test"
            DISPLAY "Choose option: " WITH NO ADVANCING
            ACCEPT user-choice
 
@@ -59,12 +64,16 @@
                WHEN 1
                    PERFORM MANUAL-INPUT-TEST
                WHEN 2
-                   PERFORM HTTP-TEST
+                   PERFORM SCREEN-EXAMPLE
                WHEN OTHER
                    DISPLAY "Invalid choice"
            END-EVALUATE
 
            STOP RUN.
+
+       SCREEN-EXAMPLE.
+           DISPLAY simple-screen
+           ACCEPT simple-screen.
 
        MANUAL-INPUT-TEST.
            DISPLAY "What is your username?"
@@ -75,8 +84,3 @@
            ACCEPT item
            DISPLAY FUNCTION TRIM(user-name) " wants to buy: "
                    FUNCTION TRIM(item).
-
-       HTTP-TEST.
-           DISPLAY "Starting HTTP client tests..."
-           DISPLAY " "
-           CALL 'HTTP-CLIENT'.
