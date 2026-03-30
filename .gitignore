@@ -55,3 +55,5 @@ core.*
 # Human readable files
 *.json
 *.txt
+
+screenio.cpy

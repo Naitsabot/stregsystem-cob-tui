@@ -209,8 +209,7 @@
        PARSE-SALE-RESULT.
            STRING
                '"\(.status)\t\(.msg)\t\(.values.cost)\t'
-               '\(.values.member_balance)\t\(.values.promille)\t'
-               '\(.values.is_ballmer_peaking)"'
+               '\(.values.member_balance)"'
                DELIMITED BY SIZE
                INTO jq-filter
            END-STRING

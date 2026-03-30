@@ -73,8 +73,6 @@
            MOVE 0 TO sale-cost
            MOVE 0 TO sale-member-balance
            MOVE SPACES TO sale-message
-           MOVE SPACES TO sale-promille
-           MOVE SPACES TO sale-ballmer-flag
 
            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 100
                MOVE SPACES TO sale-timestamp(WS-IDX)
@@ -110,7 +108,7 @@
            MOVE SPACES TO api-operation
            MOVE SPACES TO api-member-id
            MOVE SPACES TO api-room-id
-           MOVE SPACES TO api-product-id
+           MOVE SPACES TO api-order
            MOVE SPACES TO api-username
 
            GOBACK.
@@ -429,7 +427,7 @@
            STRING
                FUNCTION TRIM(api-username) DELIMITED BY SIZE
                " " DELIMITED BY SIZE
-               FUNCTION TRIM(api-product-id) DELIMITED BY SIZE
+               FUNCTION TRIM(api-order) DELIMITED BY SIZE
                INTO buystring
            END-STRING
 
@@ -468,8 +466,6 @@
                             sale-message
                             sale-cost
                             sale-member-balance
-                            sale-promille
-                            sale-ballmer-flag
                    END-UNSTRING
                END-IF
                IF api-log-level >= 1

@@ -143,7 +143,7 @@
            MOVE "xPOST_SALE" TO api-operation
            MOVE "1" TO api-member-id
            MOVE "1" TO api-room-id
-           MOVE "14" TO api-product-id
+           MOVE "14" TO api-order
            MOVE "tester" TO api-username
 
            CALL "STREGSYSTEM-API"
@@ -156,9 +156,6 @@
                DISPLAY "Sale message: " FUNCTION TRIM(sale-message)
                DISPLAY "Sale cost: " sale-cost
                DISPLAY "Member balance: " sale-member-balance
-               DISPLAY "Promille: " FUNCTION TRIM(sale-promille)
-               DISPLAY "Ballmer peaking: "
-                   FUNCTION TRIM(sale-ballmer-flag)
            END-IF
            DISPLAY " "
 
