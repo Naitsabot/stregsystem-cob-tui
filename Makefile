@@ -27,7 +27,7 @@ else ifneq (,$(wildcard .env.example))
 	export
 endif
 
-$(TARGET): $(MAIN_SRC) $(TUI_SRC) $(HTTP_CLIENT_SRC) $(API_SRC) $(JSON_DECODER_SRC) $(SCREENIO_CPY)
+$(TARGET): $(MAIN_SRC) $(TUI_SRC) $(HTTP_CLIENT_SRC) $(API_SRC) $(JSON_DECODER_SRC)
 	mkdir -p build
 	$(COB) $(COBFLAGS) -o $(TARGET) $(MAIN_SRC) $(TUI_SRC) $(API_SRC) $(HTTP_CLIENT_SRC) $(JSON_DECODER_SRC)
 
@@ -42,9 +42,6 @@ $(TEST_JSON_TARGET): $(TEST_JSON_SRC) $(JSON_ENCODER_SRC) $(JSON_DECODER_SRC)
 $(TEST_PRODUCT_DICT_TARGET): $(TEST_PRODUCT_DICT_SRC)
 	mkdir -p build
 	$(COB) $(COBFLAGS) -o $(TEST_PRODUCT_DICT_TARGET) $(TEST_PRODUCT_DICT_SRC)
-
-$(SCREENIO_CPY):
-	wget -O $(SCREENIO_CPY) https://raw.githubusercontent.com/JohnDovey/GNUCobol-Samples/refs/heads/main/screenio.cpy
 
 run: $(TARGET)
 	./$(TARGET)

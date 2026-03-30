@@ -62,6 +62,18 @@
            05  CONFIG-CMD       PIC X(512).
            05  CONFIG-EOF       PIC 9 VALUE 0.
 
+       01  inventory-work.
+           05  INV-HEADER       PIC X(64).
+           05  INV-LINES.
+               10  INV-LINE     OCCURS 30 TIMES PIC X(26).
+           05  INV-COUNT        PIC 9(3) COMP-5.
+           05  INV-ID           PIC X(10).
+           05  INV-NAME         PIC X(50).
+           05  INV-PRICE        PIC X(20).
+           05  INV-LINE-RAW     PIC X(256).
+           05  INV-POS          PIC 9(5) COMP-5.
+           05  INV-IDX          PIC 99 COMP-5.
+
        COPY "copybooks/api-request.cpy".
        COPY "copybooks/api-response.cpy".
       *COPY "copybooks/screenio.cpy".
@@ -88,11 +100,66 @@
            05 LINE 8 COLUMN 4 VALUE "Choice:".
            05 LINE 8 COLUMN 12 PIC X(8) USING SCREEN-ROOM-ID.
 
-       01 KIOSK-SELECTION-SCREEN
+       01 KIOSK-SELECTION-SCREEN-INVENTORY
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
+           05 BLANK SCREEN.
+           05 LINE 2 COLUMN 4 PIC X(64) FROM INV-HEADER.
+           05 LINE 3 COLUMN 4 VALUE "ID  PRICE  NAME".
+           05 LINE 3 COLUMN 30 VALUE "ID  PRICE  NAME".
+           05 LINE 3 COLUMN 58 VALUE "ID  PRICE  NAME".
+
+           05 LINE 4 COLUMN 4 PIC X(26) FROM INV-LINE(1).
+           05 LINE 4 COLUMN 30 PIC X(26) FROM INV-LINE(11).
+           05 LINE 4 COLUMN 58 PIC X(26) FROM INV-LINE(21).
+
+           05 LINE 5 COLUMN 4 PIC X(26) FROM INV-LINE(2).
+           05 LINE 5 COLUMN 30 PIC X(26) FROM INV-LINE(12).
+           05 LINE 5 COLUMN 58 PIC X(26) FROM INV-LINE(22).
+
+           05 LINE 6 COLUMN 4 PIC X(26) FROM INV-LINE(3).
+           05 LINE 6 COLUMN 30 PIC X(26) FROM INV-LINE(13).
+           05 LINE 6 COLUMN 58 PIC X(26) FROM INV-LINE(23).
+
+           05 LINE 7 COLUMN 4 PIC X(26) FROM INV-LINE(4).
+           05 LINE 7 COLUMN 30 PIC X(26) FROM INV-LINE(14).
+           05 LINE 7 COLUMN 58 PIC X(26) FROM INV-LINE(24).
+
+           05 LINE 8 COLUMN 4 PIC X(26) FROM INV-LINE(5).
+           05 LINE 8 COLUMN 30 PIC X(26) FROM INV-LINE(15).
+           05 LINE 8 COLUMN 58 PIC X(26) FROM INV-LINE(25).
+
+           05 LINE 9 COLUMN 4 PIC X(26) FROM INV-LINE(6).
+           05 LINE 9 COLUMN 30 PIC X(26) FROM INV-LINE(16).
+           05 LINE 9 COLUMN 58 PIC X(26) FROM INV-LINE(26).
+
+           05 LINE 10 COLUMN 4 PIC X(26) FROM INV-LINE(7).
+           05 LINE 10 COLUMN 30 PIC X(26) FROM INV-LINE(17).
+           05 LINE 10 COLUMN 58 PIC X(26) FROM INV-LINE(27).
+
+           05 LINE 11 COLUMN 4 PIC X(26) FROM INV-LINE(8).
+           05 LINE 11 COLUMN 30 PIC X(26) FROM INV-LINE(18).
+           05 LINE 11 COLUMN 58 PIC X(26) FROM INV-LINE(28).
+
+           05 LINE 12 COLUMN 4 PIC X(26) FROM INV-LINE(9).
+           05 LINE 12 COLUMN 30 PIC X(26) FROM INV-LINE(19).
+           05 LINE 12 COLUMN 58 PIC X(26) FROM INV-LINE(29).
+
+           05 LINE 13 COLUMN 4 PIC X(26) FROM INV-LINE(10).
+           05 LINE 13 COLUMN 30 PIC X(26) FROM INV-LINE(20).
+           05 LINE 13 COLUMN 58 PIC X(26) FROM INV-LINE(30).
+
+           05 LINE 15 COLUMN 4 VALUE "Press Enter to continue.".
+
+       01 KIOSK-SELECTION-SCREEN-START
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
            05 BLANK SCREEN.
            05 LINE 2 COLUMN 4 VALUE "HERE BE DRAGONS".
+
+       01 KIOSK-SELECTION-SCREEN-SELECT
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
            05 LINE 8 COLUMN 12 PIC X(64) USING SCREEN-USERNAME.
            05 LINE 9 COLUMN 12 PIC X(64) USING SCREEN-PRODUCT-ORDER.
            05 LINE 10 COLUMN 5 VALUE "Press Enter to submit.".
@@ -132,20 +199,80 @@
            PERFORM SAVE-CONFIG.
 
        KIOSK-SELECTION.
+           PERFORM KIOSK-INVENTORY-LOAD
            MOVE 0 TO DONE
            PERFORM UNTIL DONE = 1
-               DISPLAY KIOSK-SELECTION-SCREEN
-               ACCEPT KIOSK-SELECTION-SCREEN
+               DISPLAY KIOSK-SELECTION-SCREEN-START
+               DISPLAY KIOSK-SELECTION-SCREEN-INVENTORY
+               DISPLAY KIOSK-SELECTION-SCREEN-SELECT
+               ACCEPT KIOSK-SELECTION-SCREEN-SELECT
 
                PERFORM HANDLE-KEY-COLOR
-            END-PERFORM.
+           END-PERFORM.
            PERFORM SAVE-CONFIG.
+
+       KIOSK-INVENTORY-LOAD.
+           MOVE SPACES TO INV-LINES
+           MOVE 0 TO INV-COUNT
+           MOVE 1 TO INV-POS
+
+           MOVE SPACES TO api-request-data
+           MOVE "xGET_ACTIVE_PRODUCTS" TO api-operation
+           MOVE SCREEN-ROOM-ID TO api-room-id
+
+           CALL "STREGSYSTEM-API" USING
+               api-request-data
+               api-response-data
+           END-CALL
+
+           IF api-response-status NOT = 0
+               MOVE "Failed to load products" TO INV-HEADER
+           ELSE
+               MOVE SPACES TO INV-HEADER
+               STRING
+                   "Active products (room " DELIMITED BY SIZE
+                   FUNCTION TRIM(SCREEN-ROOM-ID) DELIMITED BY SIZE
+                   ")" DELIMITED BY SIZE
+                   INTO INV-HEADER
+               END-STRING
+
+               PERFORM UNTIL INV-POS >
+                       FUNCTION LENGTH(FUNCTION TRIM(api-response-body))
+                   MOVE SPACES TO INV-LINE-RAW
+                   MOVE SPACES TO INV-ID
+                   MOVE SPACES TO INV-NAME
+                   MOVE SPACES TO INV-PRICE
+                   UNSTRING api-response-body DELIMITED BY X"0A"
+                       INTO INV-LINE-RAW
+                       WITH POINTER INV-POS
+                   END-UNSTRING
+                   IF FUNCTION TRIM(INV-LINE-RAW) NOT = SPACES
+                       IF INV-COUNT < 30
+                           ADD 1 TO INV-COUNT
+                           UNSTRING INV-LINE-RAW DELIMITED BY X"09"
+                               INTO INV-ID
+                                    INV-NAME
+                                    INV-PRICE
+                           END-UNSTRING
+                           MOVE SPACES TO INV-LINE(INV-COUNT)
+                           STRING
+                               FUNCTION TRIM(INV-ID) DELIMITED BY SIZE
+                               "  " DELIMITED BY SIZE
+                              FUNCTION TRIM(INV-PRICE) DELIMITED BY SIZE
+                               "  " DELIMITED BY SIZE
+                               FUNCTION TRIM(INV-NAME) DELIMITED BY SIZE
+                               INTO INV-LINE(INV-COUNT)
+                           END-STRING
+                       END-IF
+                   END-IF
+               END-PERFORM
+           END-IF.
 
        INIT-DEFAULTS.
            IF SCREEN-ROOM-ID = SPACES
                MOVE "1" TO SCREEN-ROOM-ID
-           END-IF
-           .
+           END-IF.
+
        INIT-CONFIG.
            MOVE SPACES TO HOME-DIR
            ACCEPT HOME-DIR FROM ENVIRONMENT "HOME"
