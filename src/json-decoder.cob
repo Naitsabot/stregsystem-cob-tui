@@ -16,14 +16,19 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
+           SELECT JSON-INPUT
+               ASSIGN TO "temp-json-input.txt"
+               ORGANIZATION IS LINE SEQUENTIAL.
            SELECT JSON-OUTPUT
                ASSIGN TO "temp-json-output.txt"
                ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
        FILE SECTION.
-       FD  JSON-OUTPUT.
-       01  JSON-OUTPUT-LINE     PIC X(1024).
+        FD  JSON-INPUT.
+        01  JSON-INPUT-LINE     PIC X(8192).
+        FD  JSON-OUTPUT.
+        01  JSON-OUTPUT-LINE     PIC X(8192).
 
        WORKING-STORAGE SECTION.
       * JQ command configuration
@@ -33,6 +38,8 @@
        01  jq-result            PIC S9(9) COMP-5.
        01  temp-output-file     PIC X(100)
            VALUE "temp-json-output.txt".
+       01  temp-input-file      PIC X(100)
+           VALUE "temp-json-input.txt".
        01  temp-json-escaped    PIC X(8192).
 
       * String processing for escaping
@@ -40,6 +47,10 @@
        01  dest-pos             PIC 9(5) COMP-5.
        01  src-len              PIC 9(5) COMP-5.
        01  current-char         PIC X.
+       01  output-pos           PIC 9(5) COMP-5.
+       01  output-eof           PIC 9 VALUE 0.
+       01  input-pos            PIC 9(5) COMP-5.
+       01  input-line           PIC X(8192).
 
       * logging control
        01  logging-control.
@@ -55,7 +66,7 @@
        01  parse-operation      PIC X(20).
 
       * Output: Parsed data (structure depends on operation)
-       01  parsed-output-data   PIC X(2048).
+       01  parsed-output-data   PIC X(8192).
 
       * Output: Status code
        01  parse-status         PIC S9(9) COMP-5.
@@ -84,6 +95,8 @@
                    PERFORM PARSE-ACTIVE-PRODUCTS
                WHEN "GET_NAMED_PRODUCTS"
                    PERFORM PARSE-NAMED-PRODUCTS
+               WHEN "GET_MEMBER_SALES"
+                   PERFORM PARSE-MEMBER-SALES
                WHEN "POST_SALE"
                    PERFORM PARSE-SALE-RESULT
                WHEN "GET_VALUE"
@@ -179,13 +192,34 @@
                END-IF
            END-IF.
 
+      * PARSE-MEMBER-SALES - Extract member sales list
+      * Returns: List of timestamp<TAB>product<TAB>price (one per line)
+       PARSE-MEMBER-SALES.
+           MOVE '.sales[] | "\(.timestamp)\t\(.product)\t\(.price)"'
+               TO jq-filter
+           PERFORM EXECUTE-JQ
+           IF parse-status = 0
+               IF decoder-log-level >= 2
+                   DISPLAY "Parsed member sales"
+               END-IF
+           END-IF.
+
       * PARSE-SALE-RESULT - Extract sale result
       * Returns sale status and details
        PARSE-SALE-RESULT.
-      *    For now, just return the whole JSON as-is
-      *    TODO: Parse specific fields when sale structure is known
-           MOVE FUNCTION TRIM(json-input-data) TO parsed-output-data
-           MOVE 0 TO parse-status.
+           STRING
+               '"\(.status)\t\(.msg)\t\(.values.cost)\t'
+               '\(.values.member_balance)\t\(.values.promille)\t'
+               '\(.values.is_ballmer_peaking)"'
+               DELIMITED BY SIZE
+               INTO jq-filter
+           END-STRING
+           PERFORM EXECUTE-JQ
+           IF parse-status = 0
+               IF decoder-log-level >= 2
+                   DISPLAY "Parsed sale result"
+               END-IF
+           END-IF.
 
       * PARSE-GENERIC-VALUE - Extract a simple value
       * Generic parser for simple key-value extraction
@@ -195,19 +229,17 @@
 
       * EXECUTE-JQ - Execute jq command with current filter
        EXECUTE-JQ.
-      *    Escape single quotes in JSON for shell
-           PERFORM ESCAPE-JSON-FOR-SHELL
+           PERFORM WRITE-INPUT-TO-FILE
 
-      *    Build jq command with echo pipe
+      *    Build jq command with input file
            MOVE SPACES TO jq-command
            STRING
-               "echo '" DELIMITED BY SIZE
-               FUNCTION TRIM(temp-json-escaped) DELIMITED BY SIZE
-               "' | " DELIMITED BY SIZE
                jq-executable DELIMITED BY SPACE
                " -r '" DELIMITED BY SIZE
                FUNCTION TRIM(jq-filter) DELIMITED BY SIZE
-               "' > " DELIMITED BY SIZE
+               "' " DELIMITED BY SIZE
+               FUNCTION TRIM(temp-input-file) DELIMITED BY SPACE
+               " > " DELIMITED BY SIZE
                temp-output-file DELIMITED BY SPACE
                INTO jq-command
            END-STRING
@@ -256,20 +288,63 @@
                ADD 1 TO src-pos
            END-PERFORM.
 
+      * WRITE-INPUT-TO-FILE - Write JSON input to temp file
+       WRITE-INPUT-TO-FILE.
+           OPEN OUTPUT JSON-INPUT
+           MOVE 1 TO input-pos
+
+           PERFORM UNTIL input-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(json-input-data))
+               MOVE SPACES TO input-line
+               UNSTRING json-input-data DELIMITED BY X"0A"
+                   INTO input-line
+                   WITH POINTER input-pos
+               END-UNSTRING
+               INSPECT input-line REPLACING ALL X"0D" BY SPACE
+               WRITE JSON-INPUT-LINE FROM input-line
+           END-PERFORM
+
+           IF FUNCTION LENGTH(FUNCTION TRIM(json-input-data)) = 0
+               MOVE SPACES TO input-line
+               WRITE JSON-INPUT-LINE FROM input-line
+           END-IF
+
+           CLOSE JSON-INPUT.
+
       * READ-OUTPUT-FROM-FILE - Read jq output from temp file
        READ-OUTPUT-FROM-FILE.
            OPEN INPUT JSON-OUTPUT
+           MOVE SPACES TO parsed-output-data
+           MOVE 1 TO output-pos
+           MOVE 0 TO output-eof
 
-      *    Read first line (for simple values)
-           READ JSON-OUTPUT
-               AT END
-                   DISPLAY "jq produced no output"
-                   MOVE 3 TO parse-status
-                   CLOSE JSON-OUTPUT
-                   GOBACK
-           END-READ
+           PERFORM UNTIL output-eof = 1
+               READ JSON-OUTPUT
+                   AT END
+                       MOVE 1 TO output-eof
+                   NOT AT END
+                       IF FUNCTION TRIM(JSON-OUTPUT-LINE) NOT = SPACES
+                           STRING
+                               FUNCTION TRIM(JSON-OUTPUT-LINE)
+                               DELIMITED BY SIZE
+                               X"0A" DELIMITED BY SIZE
+                               INTO parsed-output-data
+                               WITH POINTER output-pos
+                           END-STRING
+                       END-IF
+               END-READ
+           END-PERFORM
 
-           MOVE FUNCTION TRIM(JSON-OUTPUT-LINE) TO parsed-output-data
+           IF output-pos = 1
+               DISPLAY "jq produced no output"
+               MOVE 3 TO parse-status
+               CLOSE JSON-OUTPUT
+               GOBACK
+           END-IF
+
+      *    Remove trailing newline
+           SUBTRACT 1 FROM output-pos
+           MOVE SPACE TO parsed-output-data(output-pos:1)
 
            IF decoder-log-level >= 3
                DISPLAY "Read output: "

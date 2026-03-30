@@ -5,3 +5,5 @@
        01  api-response-data.
            05  api-response-status  PIC S9(9) COMP-5.
            05  api-response-body    PIC X(8192).
+           COPY "copybooks/parsed-sale-result.cpy".
+           COPY "copybooks/parsed-member-sales.cpy".

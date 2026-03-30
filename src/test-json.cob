@@ -19,7 +19,7 @@
        01  test-json-input      PIC X(8192).
        01  test-encode-input    PIC X(1024).
        01  test-json-output     PIC X(2048).
-       01  test-parsed-output   PIC X(2048).
+       01  test-parsed-output   PIC X(8192).
        01  test-operation       PIC X(20).
        01  test-status          PIC S9(9) COMP-5.
 

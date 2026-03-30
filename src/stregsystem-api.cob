@@ -14,7 +14,17 @@
        REPOSITORY.
            FUNCTION ALL INTRINSIC.
 
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT HTTP-RESPONSE-FILE
+               ASSIGN TO "temp-http-response.txt"
+               ORGANIZATION IS LINE SEQUENTIAL.
+
        DATA DIVISION.
+       FILE SECTION.
+       FD  HTTP-RESPONSE-FILE.
+        01  HTTP-RESPONSE-LINE   PIC X(8192).
+
        WORKING-STORAGE SECTION.
       * HTTP client request structure
        COPY "copybooks/http-request.cpy".
@@ -24,8 +34,20 @@
       * JSON decoder variables
        01  json-input           PIC X(8192).
        01  parse-operation      PIC X(20).
-       01  parsed-output        PIC X(2048).
+       01  parsed-output        PIC X(8192).
        01  parse-status         PIC S9(9) COMP-5.
+
+      * Parsed structures
+       COPY "copybooks/parsed-member-info.cpy".
+       COPY "copybooks/parsed-products.cpy".
+       COPY "copybooks/product-dictionary.cpy".
+
+      * Response parsing helpers
+       01  response-pos        PIC 9(5) COMP-5.
+       01  response-eof        PIC 9 VALUE 0.
+       01  line-pos            PIC 9(5) COMP-5.
+       01  product-line        PIC X(256).
+       01  WS-IDX              PIC 99 COMP-5.
 
       * logging control
        01  logging-control.
@@ -45,6 +67,20 @@
 
        MAIN-LOGIC.
            MOVE SPACE TO http-request-data
+           MOVE SPACES TO api-response-body
+           MOVE 0 TO member-sales-count
+           MOVE 0 TO sale-status
+           MOVE 0 TO sale-cost
+           MOVE 0 TO sale-member-balance
+           MOVE SPACES TO sale-message
+           MOVE SPACES TO sale-promille
+           MOVE SPACES TO sale-ballmer-flag
+
+           PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 100
+               MOVE SPACES TO sale-timestamp(WS-IDX)
+               MOVE SPACES TO sale-product(WS-IDX)
+               MOVE 0 TO sale-price(WS-IDX)
+           END-PERFORM
            IF api-init-done = 0
                PERFORM INIT-LOGGING
                PERFORM INIT-API-CONFIG
@@ -118,6 +154,14 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_ACTIVE_PRODUCTS" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-ACTIVE-PRODUCTS-LIST
+                   MOVE "ACTIVE" TO dict-work-source
+                   PERFORM LOAD-PRODUCTS-TO-DICTIONARY
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Active products fetched successfully"
@@ -157,6 +201,14 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_NAMED_PRODUCTS" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-NAMED-PRODUCTS-LIST
+                   MOVE "NAMED" TO dict-work-source
+                   PERFORM LOAD-PRODUCTS-TO-DICTIONARY
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Named products fetched successfully"
@@ -199,6 +251,9 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER_ID" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member id fetched successfully"
@@ -244,6 +299,17 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   UNSTRING parsed-output DELIMITED BY X"09"
+                       INTO member-balance
+                            member-username
+                            member-active
+                            member-name
+                   END-UNSTRING
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member info fetched successfully"
@@ -292,6 +358,12 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER_SALES" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-MEMBER-SALES-LIST
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member sales fetched successfully"
@@ -387,6 +459,19 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "POST_SALE" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   UNSTRING parsed-output DELIMITED BY X"09"
+                       INTO sale-status
+                            sale-message
+                            sale-cost
+                            sale-member-balance
+                            sale-promille
+                            sale-ballmer-flag
+                   END-UNSTRING
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Sale created successfully"
@@ -424,6 +509,131 @@
                    DISPLAY "Test endpoint call failed"
                END-IF
            END-IF.
+
+      * READ-HTTP-RESPONSE - Load curl output into json-input
+       READ-HTTP-RESPONSE.
+           MOVE SPACES TO json-input
+           MOVE 1 TO response-pos
+           MOVE 0 TO response-eof
+
+           OPEN INPUT HTTP-RESPONSE-FILE
+
+           PERFORM UNTIL response-eof = 1
+               MOVE SPACES TO HTTP-RESPONSE-LINE
+               READ HTTP-RESPONSE-FILE
+                   AT END
+                       MOVE 1 TO response-eof
+                   NOT AT END
+                       INSPECT HTTP-RESPONSE-LINE
+                           REPLACING ALL LOW-VALUE BY SPACE
+                       INSPECT HTTP-RESPONSE-LINE
+                           REPLACING ALL X"0D" BY SPACE
+                       IF FUNCTION TRIM(HTTP-RESPONSE-LINE) NOT = SPACES
+                           STRING
+                               FUNCTION TRIM(HTTP-RESPONSE-LINE)
+                               DELIMITED BY SIZE
+                               INTO json-input
+                               WITH POINTER response-pos
+                           END-STRING
+                       END-IF
+               END-READ
+           END-PERFORM
+
+           CLOSE HTTP-RESPONSE-FILE.
+
+      * PARSE-JSON-RESPONSE - Run JSON-DECODER and store output
+       PARSE-JSON-RESPONSE.
+           MOVE SPACES TO parsed-output
+           CALL "JSON-DECODER" USING
+               json-input
+               parse-operation
+               parsed-output
+               parse-status
+           END-CALL
+
+           IF parse-status = 0
+               MOVE parsed-output TO api-response-body
+           ELSE
+               MOVE parse-status TO api-response-status
+           END-IF.
+
+      * PARSE-ACTIVE-PRODUCTS-LIST - Parse tab-delimited lines
+       PARSE-ACTIVE-PRODUCTS-LIST.
+           MOVE 0 TO products-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF products-count < 100
+                       ADD 1 TO products-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO prod-id(products-count)
+                                prod-name(products-count)
+                                prod-price(products-count)
+                       END-UNSTRING
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * PARSE-NAMED-PRODUCTS-LIST - Parse tab-delimited lines
+       PARSE-NAMED-PRODUCTS-LIST.
+           MOVE 0 TO products-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF products-count < 100
+                       ADD 1 TO products-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO prod-name(products-count)
+                                prod-id(products-count)
+                       END-UNSTRING
+                       MOVE 0 TO prod-price(products-count)
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * PARSE-MEMBER-SALES-LIST - Parse tab-delimited lines
+       PARSE-MEMBER-SALES-LIST.
+           MOVE 0 TO member-sales-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF member-sales-count < 100
+                       ADD 1 TO member-sales-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO sale-timestamp(member-sales-count)
+                                sale-product(member-sales-count)
+                                sale-price(member-sales-count)
+                       END-UNSTRING
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * Product dictionary helper procedures
+       COPY "copybooks/product-dict-procedures.cob".
 
        INIT-LOGGING.
       *    Read environment variable COB_HTTP_CLIENT_LOG;

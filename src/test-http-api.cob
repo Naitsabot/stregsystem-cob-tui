@@ -31,7 +31,7 @@
            MOVE "1" to api-room-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
@@ -44,7 +44,7 @@
            MOVE "xGET_NAMED_PRODUCTS" to  api-operation
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
@@ -59,7 +59,7 @@
            MOVE "tester" TO api-username
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
@@ -74,7 +74,7 @@
            MOVE "1" TO api-member-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
@@ -89,7 +89,7 @@
            MOVE "1" TO api-member-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
@@ -107,7 +107,7 @@
            MOVE "tester" TO api-username
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
