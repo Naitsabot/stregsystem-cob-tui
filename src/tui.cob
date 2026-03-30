@@ -30,7 +30,7 @@
          01  SCREEN-INPUTS.
            05 SCREEN-MENU-CHOICE PIC x(1) VALUE "1".
            05 SCREEN-USERNAME    PIC X(64).
-           05 SCREEN-PRODUCT-ID  PIC X(64) VALUE "1".
+           05 SCREEN-PRODUCT-ORDER  PIC X(64) VALUE "1".
            05 SCREEN-ROOM-ID     PIC X(8).
 
        01 FEEDBACK-DATA.
@@ -45,51 +45,42 @@
       *COPY "copybooks/screenio.cpy".
 
        SCREEN SECTION.
-       01 MAIN-SELECTION-SCREEN.
-           05 BLANK SCREEN
-              BACKGROUND-COLOR BG-COLOUR
-              FOREGROUND-COLOR FG-COLOUR.
+       01 MAIN-SELECTION-SCREEN
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
+           05 BLANK SCREEN.
            05 LINE 2 COLUMN 4 PIC X(64) VALUE
-               "Welcome to the stregsystem TUI written in COBOL! :D"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 4 COLUMN 4 VALUE "Choose an action"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 5 COLUMN 4 VALUE "1. Stregsystem (Default: room 1)"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 6 COLUMN 4 VALUE "2. Enter other room"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 8 COLUMN 4 VALUE "Choice:"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 8 COLUMN 12 PIC X(1) USING SCREEN-MENU-CHOICE
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
+               "Welcome to the stregsystem TUI written in COBOL! :D".
+           05 LINE 4 COLUMN 4 VALUE "Choose an action".
+           05 LINE 5 COLUMN 4 VALUE "1. Stregsystem (Default: room 1)".
+           05 LINE 6 COLUMN 4 VALUE "2. Enter other room".
+           05 LINE 8 COLUMN 4 VALUE "Choice:".
+           05 LINE 8 COLUMN 12 PIC X(1) USING SCREEN-MENU-CHOICE.
 
-       01 ROOM-SELECTION-SCREEN.
-           05 BLANK SCREEN
-              BACKGROUND-COLOR BG-COLOUR
-              FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 2 COLUMN 4 VALUE "Choose one of the following rooms"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 4 COLUMN 4 VALUE "BUNCH OF ROOMS HERE"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 8 COLUMN 4 VALUE "Choice:"
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 8 COLUMN 12 PIC X(8) USING SCREEN-ROOM-ID
-               BACKGROUND-COLOR BG-COLOUR
-               FOREGROUND-COLOR FG-COLOUR.
+       01 ROOM-SELECTION-SCREEN
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
+           05 BLANK SCREEN.
+           05 LINE 2 COLUMN 4 VALUE "Choose one of the following rooms".
+           05 LINE 4 COLUMN 4 VALUE "BUNCH OF ROOMS HERE".
+           05 LINE 8 COLUMN 4 VALUE "Choice:".
+           05 LINE 8 COLUMN 12 PIC X(8) USING SCREEN-ROOM-ID.
+
+       01 KIOSK-SELECTION-SCREEN
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
+           05 BLANK SCREEN.
+           05 LINE 2 COLUMN 4 VALUE "HERE BE DRAGONS".
+           05 LINE 8 COLUMN 12 PIC X(64) USING SCREEN-USERNAME.
+           05 LINE 9 COLUMN 12 PIC X(64) USING SCREEN-PRODUCT-ORDER.
+           05 LINE 10 COLUMN 5 VALUE "Press Enter to submit.".
 
        PROCEDURE DIVISION.
            MOVE SPACES TO SCREEN-INPUTS
            PERFORM MAIN-SELECTION.
+           PERFORM KIOSK-SELECTION.
 
+           DISPLAY
 
            GOBACK.
 
@@ -99,34 +90,7 @@
                DISPLAY MAIN-SELECTION-SCREEN
                ACCEPT MAIN-SELECTION-SCREEN
 
-               EVALUATE CRT-STATUS
-                   WHEN KEY-F1
-                       MOVE 0 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F2
-                       MOVE 1 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F3
-                       MOVE 2 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F4
-                       MOVE 3 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F5
-                       MOVE 4 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F6
-                       MOVE 5 TO BG-COLOUR
-                       MOVE 7 TO FG-COLOUR
-                   WHEN KEY-F7
-                       MOVE 6 TO BG-COLOUR
-                       MOVE 0 TO FG-COLOUR
-                   WHEN KEY-F8
-                       MOVE 7 TO BG-COLOUR
-                       MOVE 0 TO FG-COLOUR
-                   WHEN OTHER
-                       MOVE 1 TO DONE
-               END-EVALUATE
+               PERFORM HANDLE-KEY-COLOR
            END-PERFORM
 
            IF SCREEN-MENU-CHOICE = "2"
@@ -134,5 +98,49 @@
            END-IF.
 
        ROOM-SELECTION.
-           DISPLAY ROOM-SELECTION-SCREEN
-           ACCEPT ROOM-SELECTION-SCREEN.
+           MOVE 0 TO DONE
+           PERFORM UNTIL DONE = 1
+               DISPLAY ROOM-SELECTION-SCREEN
+               ACCEPT ROOM-SELECTION-SCREEN
+
+               PERFORM HANDLE-KEY-COLOR
+           END-PERFORM.
+
+       KIOSK-SELECTION.
+           MOVE 0 TO DONE
+           PERFORM UNTIL DONE = 1
+               DISPLAY KIOSK-SELECTION-SCREEN
+               ACCEPT KIOSK-SELECTION-SCREEN
+
+               PERFORM HANDLE-KEY-COLOR
+            END-PERFORM.
+
+       HANDLE-KEY-COLOR.
+           EVALUATE CRT-STATUS
+               WHEN KEY-F1
+                   MOVE 0 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F2
+                   MOVE 1 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F3
+                   MOVE 2 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F4
+                   MOVE 3 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F5
+                   MOVE 4 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F6
+                   MOVE 5 TO BG-COLOUR
+                   MOVE 7 TO FG-COLOUR
+               WHEN KEY-F7
+                   MOVE 6 TO BG-COLOUR
+                   MOVE 0 TO FG-COLOUR
+               WHEN KEY-F8
+                   MOVE 7 TO BG-COLOUR
+                   MOVE 0 TO FG-COLOUR
+               WHEN OTHER
+                   MOVE 1 TO DONE
+           END-EVALUATE.
