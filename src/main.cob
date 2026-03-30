@@ -29,6 +29,8 @@
       *             decoding added. updated tests. added copybooks.
       *     a0.4.1: Add simple screen section example.
       *     a0.4.2: Add first part of TUI using SCREEN SECTION.
+      *     a0.4.3: Load configs, and refactor temp files
+      *     a0.4.4; Add active produts screen
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
