@@ -21,20 +21,16 @@
        01  system-cmd-full      PIC X(4400).
        01  system-result        PIC S9(9) COMP-5.
        01  body-length          PIC 9(5).
+       01  response-output-file PIC X(100) VALUE
+           "temp-http-response.txt".
        01  http-client-init-flag.
            05  init-done        PIC 9 VALUE 0.
            05  log-level        PIC 9 VALUE 0.
            05  env-val          PIC X(10).
 
        LINKAGE SECTION.
-       01  http-request-data.
-           05  req-method       PIC X(10).
-           05  req-host         PIC X(100). *> Dep.
-           05  req-port         PIC X(4). *> Dep.
-           05  req-url          PIC X(200).
-           05  req-path         PIC X(200).
-           05  req-body         PIC X(1000).
-       01  http-response-status PIC S9(9) COMP-5.
+       COPY "copybooks/http-request.cpy".
+       COPY "copybooks/http-response-status.cpy".
 
        PROCEDURE DIVISION USING http-request-data
                                 http-response-status.
@@ -59,11 +55,13 @@
        EXECUTE-GET-REQUEST.
            MOVE SPACES TO system-cmd
            STRING
-               "curl -X 'GET' '"
+               "curl -s -X 'GET' '"
                FUNCTION TRIM(req-url)
                FUNCTION TRIM(req-path)
                DELIMITED BY SIZE "' "
-               "-H 'accept: application/json'"
+               "-H 'accept: application/json' "
+               "-o " DELIMITED BY SIZE
+               FUNCTION TRIM(response-output-file)
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING
@@ -114,13 +112,15 @@
            MOVE SPACES TO system-cmd
 
            STRING
-               "curl -X 'POST' '"
+               "curl -s -X 'POST' '"
                FUNCTION TRIM(req-url)
                FUNCTION TRIM(req-path)
                DELIMITED BY SIZE "' "
                "-H 'accept: application/json' "
                "-H 'Content-Type: application/json' "
-               "-d '" FUNCTION TRIM(req-body) "'"
+               "-d '" FUNCTION TRIM(req-body) "' "
+               "-o " DELIMITED BY SIZE
+               FUNCTION TRIM(response-output-file)
                DELIMITED BY SIZE
                INTO system-cmd
            END-STRING

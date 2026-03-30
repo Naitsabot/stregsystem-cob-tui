@@ -14,18 +14,40 @@
        REPOSITORY.
            FUNCTION ALL INTRINSIC.
 
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT HTTP-RESPONSE-FILE
+               ASSIGN TO "temp-http-response.txt"
+               ORGANIZATION IS LINE SEQUENTIAL.
+
        DATA DIVISION.
+       FILE SECTION.
+       FD  HTTP-RESPONSE-FILE.
+        01  HTTP-RESPONSE-LINE   PIC X(8192).
+
        WORKING-STORAGE SECTION.
       * HTTP client request structure
-       01  http-request.
-           05  req-method       PIC X(10).
-           05  req-host         PIC X(100). *> Dep. nc
-           05  req-port         PIC X(4). *> Dep. nc
-           05  req-url          PIC X(200).
-           05  req-path         PIC X(200).
-           05  req-body         PIC X(1000).
-       01  http-status          PIC S9(9) COMP-5.
+       COPY "copybooks/http-request.cpy".
+       COPY "copybooks/http-response-status.cpy".
        01  buystring            PIC X(100).
+
+      * JSON decoder variables
+       01  json-input           PIC X(8192).
+       01  parse-operation      PIC X(20).
+       01  parsed-output        PIC X(8192).
+       01  parse-status         PIC S9(9) COMP-5.
+
+      * Parsed structures
+       COPY "copybooks/parsed-member-info.cpy".
+       COPY "copybooks/parsed-products.cpy".
+       COPY "copybooks/product-dictionary.cpy".
+
+      * Response parsing helpers
+       01  response-pos        PIC 9(5) COMP-5.
+       01  response-eof        PIC 9 VALUE 0.
+       01  line-pos            PIC 9(5) COMP-5.
+       01  product-line        PIC X(256).
+       01  WS-IDX              PIC 99 COMP-5.
 
       * logging control
        01  logging-control.
@@ -34,26 +56,34 @@
            05  api-env-val      PIC X(10).
 
       * API configuration
-       01  api-host             PIC X(100) VALUE "127.0.0.1". *> Dep.
-       01  api-port             PIC X(4) VALUE "8000". *> Dep.
-       01  api-url              PIC X(200) VALUE"http://localhost:8000".
+       01  api-url              PIC X(200).
 
        LINKAGE SECTION.
-       01  api-request-data.
-           05  api-operation    PIC X(20).
-           05  api-member-id    PIC X(5).
-           05  api-room-id      PIC X(5).
-           05  api-product-id   PIC X(5).
-           05  api-username     PIC X(30).
-       01  api-response-status  PIC S9(9) COMP-5.
+       COPY "copybooks/api-request.cpy".
+       COPY "copybooks/api-response.cpy".
 
        PROCEDURE DIVISION USING api-request-data
-                                api-response-status.
+                                api-response-data.
 
        MAIN-LOGIC.
-           MOVE SPACE TO http-request
+           MOVE SPACE TO http-request-data
+           MOVE SPACES TO api-response-body
+           MOVE 0 TO member-sales-count
+           MOVE 0 TO sale-status
+           MOVE 0 TO sale-cost
+           MOVE 0 TO sale-member-balance
+           MOVE SPACES TO sale-message
+           MOVE SPACES TO sale-promille
+           MOVE SPACES TO sale-ballmer-flag
+
+           PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 100
+               MOVE SPACES TO sale-timestamp(WS-IDX)
+               MOVE SPACES TO sale-product(WS-IDX)
+               MOVE 0 TO sale-price(WS-IDX)
+           END-PERFORM
            IF api-init-done = 0
                PERFORM INIT-LOGGING
+               PERFORM INIT-API-CONFIG
            END-IF
 
 
@@ -105,8 +135,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING
                "/api/products/active_products?room_id="
@@ -119,11 +147,21 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_ACTIVE_PRODUCTS" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-ACTIVE-PRODUCTS-LIST
+                   MOVE "ACTIVE" TO dict-work-source
+                   PERFORM LOAD-PRODUCTS-TO-DICTIONARY
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Active products fetched successfully"
@@ -148,8 +186,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            MOVE "/api/products/named_products" TO req-path
            MOVE SPACES TO req-body
@@ -158,11 +194,21 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_NAMED_PRODUCTS" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-NAMED-PRODUCTS-LIST
+                   MOVE "NAMED" TO dict-work-source
+                   PERFORM LOAD-PRODUCTS-TO-DICTIONARY
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Named products fetched successfully"
@@ -187,8 +233,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member/get_id?username="
                FUNCTION TRIM(api-username) DELIMITED BY SIZE
@@ -200,11 +244,16 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER_ID" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member id fetched successfully"
@@ -232,8 +281,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
@@ -245,11 +292,24 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   UNSTRING parsed-output DELIMITED BY X"09"
+                       INTO member-balance
+                            member-username
+                            member-active
+                            member-name
+                   END-UNSTRING
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member info fetched successfully"
@@ -280,8 +340,6 @@
            END-IF
 
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            STRING "/api/member/sales?member_id="
                FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
@@ -293,11 +351,19 @@
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "GET_MEMBER_SALES" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   PERFORM PARSE-MEMBER-SALES-LIST
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Member sales fetched successfully"
@@ -356,8 +422,6 @@
            MOVE "/api/sale" TO req-path
 
            MOVE "POST" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
 
       *    Build buystring: username + space + product-id
@@ -388,11 +452,26 @@
                DISPLAY "Request body: " FUNCTION TRIM(req-body)
            END-IF
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
+               PERFORM READ-HTTP-RESPONSE
+               MOVE "POST_SALE" TO parse-operation
+               PERFORM PARSE-JSON-RESPONSE
+               IF parse-status = 0
+                   UNSTRING parsed-output DELIMITED BY X"09"
+                       INTO sale-status
+                            sale-message
+                            sale-cost
+                            sale-member-balance
+                            sale-promille
+                            sale-ballmer-flag
+                   END-UNSTRING
+               END-IF
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Sale created successfully"
@@ -409,17 +488,17 @@
                DISPLAY "Calling test endpoint..."
            END-IF
            MOVE "GET" TO req-method
-      *     MOVE api-host TO req-host
-      *     MOVE api-port TO req-port
            MOVE api-url TO req-url
            MOVE "/test" TO req-path
            MOVE SPACES TO req-body
 
-           CALL "HTTP-CLIENT" USING http-request http-status
+           CALL "HTTP-CLIENT" USING
+               http-request-data
+               http-response-status
            END-CALL
-           MOVE http-status TO api-response-status
+           MOVE http-response-status TO api-response-status
 
-           IF http-status = 0
+           IF http-response-status = 0
                IF api-log-level >= 1
                    DISPLAY " "
                    DISPLAY "Test endpoint call successful"
@@ -430,6 +509,131 @@
                    DISPLAY "Test endpoint call failed"
                END-IF
            END-IF.
+
+      * READ-HTTP-RESPONSE - Load curl output into json-input
+       READ-HTTP-RESPONSE.
+           MOVE SPACES TO json-input
+           MOVE 1 TO response-pos
+           MOVE 0 TO response-eof
+
+           OPEN INPUT HTTP-RESPONSE-FILE
+
+           PERFORM UNTIL response-eof = 1
+               MOVE SPACES TO HTTP-RESPONSE-LINE
+               READ HTTP-RESPONSE-FILE
+                   AT END
+                       MOVE 1 TO response-eof
+                   NOT AT END
+                       INSPECT HTTP-RESPONSE-LINE
+                           REPLACING ALL LOW-VALUE BY SPACE
+                       INSPECT HTTP-RESPONSE-LINE
+                           REPLACING ALL X"0D" BY SPACE
+                       IF FUNCTION TRIM(HTTP-RESPONSE-LINE) NOT = SPACES
+                           STRING
+                               FUNCTION TRIM(HTTP-RESPONSE-LINE)
+                               DELIMITED BY SIZE
+                               INTO json-input
+                               WITH POINTER response-pos
+                           END-STRING
+                       END-IF
+               END-READ
+           END-PERFORM
+
+           CLOSE HTTP-RESPONSE-FILE.
+
+      * PARSE-JSON-RESPONSE - Run JSON-DECODER and store output
+       PARSE-JSON-RESPONSE.
+           MOVE SPACES TO parsed-output
+           CALL "JSON-DECODER" USING
+               json-input
+               parse-operation
+               parsed-output
+               parse-status
+           END-CALL
+
+           IF parse-status = 0
+               MOVE parsed-output TO api-response-body
+           ELSE
+               MOVE parse-status TO api-response-status
+           END-IF.
+
+      * PARSE-ACTIVE-PRODUCTS-LIST - Parse tab-delimited lines
+       PARSE-ACTIVE-PRODUCTS-LIST.
+           MOVE 0 TO products-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF products-count < 100
+                       ADD 1 TO products-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO prod-id(products-count)
+                                prod-name(products-count)
+                                prod-price(products-count)
+                       END-UNSTRING
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * PARSE-NAMED-PRODUCTS-LIST - Parse tab-delimited lines
+       PARSE-NAMED-PRODUCTS-LIST.
+           MOVE 0 TO products-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF products-count < 100
+                       ADD 1 TO products-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO prod-name(products-count)
+                                prod-id(products-count)
+                       END-UNSTRING
+                       MOVE 0 TO prod-price(products-count)
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * PARSE-MEMBER-SALES-LIST - Parse tab-delimited lines
+       PARSE-MEMBER-SALES-LIST.
+           MOVE 0 TO member-sales-count
+           MOVE 1 TO line-pos
+
+           PERFORM UNTIL line-pos >
+               FUNCTION LENGTH(FUNCTION TRIM(parsed-output))
+               MOVE SPACES TO product-line
+               UNSTRING parsed-output DELIMITED BY X"0A"
+                   INTO product-line
+                   WITH POINTER line-pos
+               END-UNSTRING
+
+               IF FUNCTION TRIM(product-line) NOT = SPACES
+                   IF member-sales-count < 100
+                       ADD 1 TO member-sales-count
+                       UNSTRING product-line DELIMITED BY X"09"
+                           INTO sale-timestamp(member-sales-count)
+                                sale-product(member-sales-count)
+                                sale-price(member-sales-count)
+                       END-UNSTRING
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+      * Product dictionary helper procedures
+       COPY "copybooks/product-dict-procedures.cob".
 
        INIT-LOGGING.
       *    Read environment variable COB_HTTP_CLIENT_LOG;
@@ -450,3 +654,10 @@
            END-IF
            MOVE 1 TO api-init-done
            . *> end of function
+
+       INIT-API-CONFIG.
+      *    Read environment variable for API configuration
+           ACCEPT api-url FROM ENVIRONMENT "STREGSYSTEM_URL"
+           IF api-url = SPACES
+               MOVE "http://localhost:8000" TO api-url
+           END-IF.

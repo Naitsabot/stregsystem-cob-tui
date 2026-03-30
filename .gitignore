@@ -48,3 +48,10 @@ core.*
 *.project
 *.classpath
 *.settings/
+
+# Environment configuration
+.env
+
+# Human readable files
+*.json
+*.txt

@@ -14,13 +14,11 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  api-request-data.
-           05  api-operation    PIC X(20).
-           05  api-member-id    PIC X(5).
-           05  api-room-id      PIC X(5).
-           05  api-product-id   PIC X(5).
-           05  api-username     PIC X(30).
-       01  api-response-status  PIC S9(9) COMP-5.
+       COPY "copybooks/api-request.cpy".
+       COPY "copybooks/api-response.cpy".
+       COPY "copybooks/parsed-member-info.cpy".
+       01  WS-IDX               PIC 99 COMP-5.
+       01  display-limit        PIC 99 COMP-5.
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
@@ -36,10 +34,14 @@
            MOVE "1" to api-room-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               DISPLAY "Parsed products (active):"
+               DISPLAY FUNCTION TRIM(api-response-body)
+           END-IF
            DISPLAY " "
 
       *    Test: Fetch named products
@@ -49,10 +51,14 @@
            MOVE "xGET_NAMED_PRODUCTS" to  api-operation
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               DISPLAY "Parsed products (named):"
+               DISPLAY FUNCTION TRIM(api-response-body)
+           END-IF
            DISPLAY " "
 
       *    Test: Fetch member_id for username 'tester'
@@ -64,10 +70,13 @@
            MOVE "tester" TO api-username
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               DISPLAY "Member id: " FUNCTION TRIM(api-response-body)
+           END-IF
            DISPLAY " "
 
       *    Test: Fetch user-info for member with id "1"
@@ -79,10 +88,23 @@
            MOVE "1" TO api-member-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               UNSTRING api-response-body DELIMITED BY X"09"
+                   INTO member-balance
+                        member-username
+                        member-active
+                        member-name
+               END-UNSTRING
+               DISPLAY "Member balance: " member-balance
+               DISPLAY "Member username: "
+                   FUNCTION TRIM(member-username)
+               DISPLAY "Member active: " FUNCTION TRIM(member-active)
+               DISPLAY "Member name: " FUNCTION TRIM(member-name)
+           END-IF
            DISPLAY " "
 
       *    Test: Fetch sales history of member with id of "1"
@@ -94,10 +116,23 @@
            MOVE "1" TO api-member-id
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               DISPLAY "Member sales count: " member-sales-count
+               MOVE 5 TO display-limit
+               IF member-sales-count < display-limit
+                   MOVE member-sales-count TO display-limit
+               END-IF
+               PERFORM VARYING WS-IDX FROM 1 BY 1
+                   UNTIL WS-IDX > display-limit
+                   DISPLAY "  " FUNCTION TRIM(sale-timestamp(WS-IDX))
+                           " | " FUNCTION TRIM(sale-product(WS-IDX))
+                           " | " sale-price(WS-IDX)
+               END-PERFORM
+           END-IF
            DISPLAY " "
 
 
@@ -112,10 +147,19 @@
            MOVE "tester" TO api-username
 
            CALL "STREGSYSTEM-API"
-               USING api-request-data api-response-status
+               USING api-request-data api-response-data
            END-CALL
 
            DISPLAY "Status: " api-response-status
+           IF api-response-status = 0
+               DISPLAY "Sale status: " sale-status
+               DISPLAY "Sale message: " FUNCTION TRIM(sale-message)
+               DISPLAY "Sale cost: " sale-cost
+               DISPLAY "Member balance: " sale-member-balance
+               DISPLAY "Promille: " FUNCTION TRIM(sale-promille)
+               DISPLAY "Ballmer peaking: "
+                   FUNCTION TRIM(sale-ballmer-flag)
+           END-IF
            DISPLAY " "
 
            STOP RUN.
