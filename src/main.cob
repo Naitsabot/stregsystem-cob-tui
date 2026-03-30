@@ -28,6 +28,7 @@
       *     a0.4.0: Integrate JSON encoding and decoding into API calls.
       *             decoding added. updated tests. added copybooks.
       *     a0.4.1: Add simple screen section example.
+      *     a0.4.2: Add first part of TUI using SCREEN SECTION.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -52,22 +53,22 @@
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
-           CALL "HELPER".
+           CALL "TUI".
 
-           DISPLAY " "
-           DISPLAY "1. Manual input test"
-           DISPLAY "2. Run SCREEN SECTION test"
-           DISPLAY "Choose option: " WITH NO ADVANCING
-           ACCEPT user-choice
-
-           EVALUATE user-choice
-               WHEN 1
-                   PERFORM MANUAL-INPUT-TEST
-               WHEN 2
-                   PERFORM SCREEN-EXAMPLE
-               WHEN OTHER
-                   DISPLAY "Invalid choice"
-           END-EVALUATE
+      *    DISPLAY " "
+      *    DISPLAY "1. Manual input test"
+      *    DISPLAY "2. Run SCREEN SECTION test"
+      *    DISPLAY "Choose option: " WITH NO ADVANCING
+      *    ACCEPT user-choice
+      *
+      *    EVALUATE user-choice
+      *        WHEN 1
+      *            PERFORM MANUAL-INPUT-TEST
+      *        WHEN 2
+      *            PERFORM SCREEN-EXAMPLE
+      *        WHEN OTHER
+      *            DISPLAY "Invalid choice"
+      *    END-EVALUATE
 
            STOP RUN.
 
