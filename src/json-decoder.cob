@@ -17,10 +17,10 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT JSON-INPUT
-               ASSIGN TO "temp-json-input.txt"
+               ASSIGN TO WS-JSON-INPUT-PATH
                ORGANIZATION IS LINE SEQUENTIAL.
            SELECT JSON-OUTPUT
-               ASSIGN TO "temp-json-output.txt"
+               ASSIGN TO WS-JSON-OUTPUT-PATH
                ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
@@ -41,6 +41,13 @@
        01  temp-input-file      PIC X(100)
            VALUE "temp-json-input.txt".
        01  temp-json-escaped    PIC X(8192).
+
+      * Temp file paths
+       01  WS-TEMP-DIR          PIC X(256).
+       01  WS-TEMP-DIR-ENV      PIC X(256).
+       01  WS-JSON-INPUT-PATH   PIC X(256).
+       01  WS-JSON-OUTPUT-PATH  PIC X(256).
+       01  WS-TEMP-CMD          PIC X(512).
 
       * String processing for escaping
        01  src-pos              PIC 9(5) COMP-5.
@@ -79,6 +86,7 @@
        MAIN-LOGIC.
            IF decoder-init-done = 0
                PERFORM INIT-LOGGING
+               PERFORM INIT-TEMP-DIR
            END-IF
 
            MOVE 0 TO parse-status
@@ -122,6 +130,49 @@
                DISPLAY "JSON-DECODER initialized with log level "
                        decoder-log-level
            END-IF.
+
+       INIT-TEMP-DIR.
+           MOVE SPACES TO WS-TEMP-DIR-ENV
+           ACCEPT WS-TEMP-DIR-ENV FROM ENVIRONMENT "XDG_RUNTIME_DIR"
+           IF FUNCTION TRIM(WS-TEMP-DIR-ENV) = SPACES
+               ACCEPT WS-TEMP-DIR-ENV FROM ENVIRONMENT "TMPDIR"
+           END-IF
+           IF FUNCTION TRIM(WS-TEMP-DIR-ENV) = SPACES
+               MOVE "/tmp" TO WS-TEMP-DIR-ENV
+           END-IF
+
+           MOVE SPACES TO WS-TEMP-DIR
+           STRING
+               FUNCTION TRIM(WS-TEMP-DIR-ENV) DELIMITED BY SIZE
+               "/stregsystem-tui" DELIMITED BY SIZE
+               INTO WS-TEMP-DIR
+           END-STRING
+
+           MOVE SPACES TO WS-TEMP-CMD
+           STRING
+               "mkdir -p " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               INTO WS-TEMP-CMD
+           END-STRING
+           CALL "SYSTEM" USING WS-TEMP-CMD
+           END-CALL
+
+           MOVE SPACES TO WS-JSON-INPUT-PATH
+           STRING
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               "/json-input.txt" DELIMITED BY SIZE
+               INTO WS-JSON-INPUT-PATH
+           END-STRING
+
+           MOVE SPACES TO WS-JSON-OUTPUT-PATH
+           STRING
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               "/json-output.txt" DELIMITED BY SIZE
+               INTO WS-JSON-OUTPUT-PATH
+           END-STRING
+
+           MOVE WS-JSON-INPUT-PATH TO temp-input-file
+           MOVE WS-JSON-OUTPUT-PATH TO temp-output-file.
 
       * PARSE-MEMBER-ID - Extract member_id from response
       * Example: {"member_id": 321}

@@ -17,7 +17,7 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT HTTP-RESPONSE-FILE
-               ASSIGN TO "temp-http-response.txt"
+               ASSIGN TO WS-HTTP-RESPONSE-PATH
                ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
@@ -30,6 +30,12 @@
        COPY "copybooks/http-request.cpy".
        COPY "copybooks/http-response-status.cpy".
        01  buystring            PIC X(100).
+
+      * Temp file paths
+         01  WS-TEMP-DIR          PIC X(256).
+         01  WS-TEMP-DIR-ENV      PIC X(256).
+         01  WS-HTTP-RESPONSE-PATH PIC X(256).
+         01  WS-TEMP-CMD          PIC X(512).
 
       * JSON decoder variables
        01  json-input           PIC X(8192).
@@ -82,6 +88,7 @@
            IF api-init-done = 0
                PERFORM INIT-LOGGING
                PERFORM INIT-API-CONFIG
+               PERFORM INIT-TEMP-DIR
            END-IF
 
 
@@ -650,6 +657,39 @@
            END-IF
            MOVE 1 TO api-init-done
            . *> end of function
+
+       INIT-TEMP-DIR.
+           MOVE SPACES TO WS-TEMP-DIR-ENV
+           ACCEPT WS-TEMP-DIR-ENV FROM ENVIRONMENT "XDG_RUNTIME_DIR"
+           IF FUNCTION TRIM(WS-TEMP-DIR-ENV) = SPACES
+               ACCEPT WS-TEMP-DIR-ENV FROM ENVIRONMENT "TMPDIR"
+           END-IF
+           IF FUNCTION TRIM(WS-TEMP-DIR-ENV) = SPACES
+               MOVE "/tmp" TO WS-TEMP-DIR-ENV
+           END-IF
+
+           MOVE SPACES TO WS-TEMP-DIR
+           STRING
+               FUNCTION TRIM(WS-TEMP-DIR-ENV) DELIMITED BY SIZE
+               "/stregsystem-tui" DELIMITED BY SIZE
+               INTO WS-TEMP-DIR
+           END-STRING
+
+           MOVE SPACES TO WS-TEMP-CMD
+           STRING
+               "mkdir -p " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               INTO WS-TEMP-CMD
+           END-STRING
+           CALL "SYSTEM" USING WS-TEMP-CMD
+           END-CALL
+
+           MOVE SPACES TO WS-HTTP-RESPONSE-PATH
+           STRING
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               "/http-response.txt" DELIMITED BY SIZE
+               INTO WS-HTTP-RESPONSE-PATH
+           END-STRING.
 
        INIT-API-CONFIG.
       *    Read environment variable for API configuration
