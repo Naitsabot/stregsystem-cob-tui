@@ -25,6 +25,8 @@
       *     a0.3.1: Introduces copybooks for linkage sections.
       *     a0.3.2: Fix configurations. Added enc support.
       *     a0.3.3: Added JSON encoding and decoding tests.
+      *     a0.4.0: Integrate JSON encoding and decoding into API calls.
+      *             decoding added. updated tests. added copybooks.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
