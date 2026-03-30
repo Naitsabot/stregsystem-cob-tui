@@ -96,8 +96,9 @@ pre-commit run --files src/*.cob
 - [x] JSON parsing and serialization
   - [x] JSON encoding using manual string building
   - [x] JSON decoding using jq.exe external parser
-  - [ ] JSON generation using JSON GENERATE (optional enhancement)
-  - [ ] JSON parsing using JSON PARSE (unsupported by gnuCOBOL :((( )
+  - [-] JSON generation using JSON GENERATE (optional enhancement)
+  - [-] JSON parsing using JSON PARSE (unsupported by gnuCOBOL :((( )
+  - [x] Integrate JSON into API
 
 #### HTTP/1.1 client
 
@@ -167,7 +168,6 @@ or individual test files:
 
 ```bash
 make test-json          # Test basic JSON (older)
-make test-json-full     # Test full JSON encoder/decoder
 make test-api           # Test API integration
 make test-product-dict  # Test product dictionary
 ```
