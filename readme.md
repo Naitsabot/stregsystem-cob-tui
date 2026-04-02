@@ -142,6 +142,12 @@ jq --version
 
 You should see version information if all tools are installed correctly.
 
+#### Why not the cobol frontend for gcc?
+
+Becuase I didn't know, thats why. Also it targets ANSI COBOL 85, and som IBM and MSV extentions, but i have no idea what I would do.
+
+[https://cobolforgcc.sourceforge.net/cobol_1.html#SEC2](https://cobolforgcc.sourceforge.net/cobol_1.html#SEC2)
+
 ### Installing the TUI
 
 Not implemented yet. When it is, there will probably be a package or install script here.
