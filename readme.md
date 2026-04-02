@@ -124,6 +124,16 @@ yay -S gnucobol
 pacman -S curl jq
 ```
 
+#### Why not the cobol frontend for gcc?
+
+Becuase I didn't know, thats why. Also it targets ANSI COBOL 85, and som IBM and MSV extentions, but i have no idea what I would do.
+
+I love the quote from the documentation og tthe frontend, as to "why a COBOL compiler". It starts out with:
+
+> The use of the term 'COBOL' should not be taken as a representation that the COBOL for GCC system is an accurate, functional or complete implementation of the COBOL language
+
+[https://cobolforgcc.sourceforge.net/cobol_1.html#SEC1](https://cobolforgcc.sourceforge.net/cobol_1.html#SEC1)
+
 #### From Source
 
 Download GnuCOBOL compiler from [gnucobol.sourceforge.io](https://gnucobol.sourceforge.io/) and follow the build instructions in the tarball.
