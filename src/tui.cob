@@ -45,7 +45,7 @@
            05 SCREEN-ROOM-ID     PIC X(8).
 
        01  FEEDBACK-DATA.
-           05 FEEDBACK-LINE      PIC X(80).
+           05 FEEDBACK-LINE      PIC X(80) VALUE "STATUS STRING HERE".
 
        01  lookup-work.
            05  member-id       PIC X(5).
@@ -83,97 +83,147 @@
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
            05 BLANK SCREEN.
-           05 LINE 2 COLUMN 4 PIC X(64) VALUE
-               "Welcome to the stregsystem TUI written in COBOL! :D".
-           05 LINE 4 COLUMN 4 VALUE "Choose an action".
-           05 LINE 5 COLUMN 4 VALUE "1. Stregsystem (Default: room 1)".
-           05 LINE 6 COLUMN 4 VALUE "2. Enter other room".
-           05 LINE 8 COLUMN 4 VALUE "Choice:".
-           05 LINE 8 COLUMN 12 PIC X(1) USING SCREEN-MENU-CHOICE.
+           05 LINE 2 COLUMN 4 VALUE "WELCOME TO THE".
+           05 LINE 4 COLUMN 4 VALUE "  .###:   ##   #####.   ##   #  " &
+      -        "          ####### #    # ##### ".
+           05 LINE 5 COLUMN 4 VALUE " .#: .# :#  #: #   :# :#  #: #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 6 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 7 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 8 COLUMN 4 VALUE " #      #    # #####. #    # #  " &
+      -        "Stregsystem  #    #    #   #   ".
+           05 LINE 9 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 10 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# # " &
+      -        "              #    #    #   #   ".
+           05 LINE 11 COLUMN 4 VALUE " .#: .  :#  #: #   :# :#  #: # " &
+      -        "              #    #:  :#   #   ".
+           05 LINE 12 COLUMN 4 VALUE "  :###:   ##   #####.   ##   ##" &
+      -        "####          #     ####  ##### ".
+           05 LINE 14 COLUMN 4 VALUE "Choose an action:".
+           05 LINE 15 COLUMN 4 VALUE "1. Stregsystem (room ".
+           05 LINE 15 COLUMN 37 PIC X(8) FROM SCREEN-ROOM-ID.
+           05 LINE 16 COLUMN 4 VALUE "2. Enter other room".
+           05 LINE 17 COLUMN 4 VALUE "3. Quit".
+           05 LINE 19 COLUMN 4 VALUE "Choice:".
+           05 LINE 19 COLUMN 12 PIC X(1) USING SCREEN-MENU-CHOICE.
+           05 LINE 21 COLUMN 4 VALUE "Press ENTER TO confirm choice".
+           05 LINE 22 COLUMN 4 VALUE"Use F1-8 to change colour scheme!".
 
        01 ROOM-SELECTION-SCREEN
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
+           
            05 BLANK SCREEN.
-           05 LINE 2 COLUMN 4 VALUE "Choose one of the following rooms".
-           05 LINE 4 COLUMN 4 VALUE "BUNCH OF ROOMS HERE".
+           05 LINE 2 COLUMN 4 VALUE "Choose one of the".
+           05 LINE 2 COLUMN 22 VALUE " following rooms".
+           05 LINE 4 COLUMN 4 VALUE "BUNCH OF ROOMS".
+           05 LINE 5 COLUMN 4 VALUE "1 : Default test kiosk".
+           05 LINE 6 COLUMN 4 VALUE "10: Stregsystem kiosk".
            05 LINE 8 COLUMN 4 VALUE "Choice:".
            05 LINE 8 COLUMN 12 PIC X(8) USING SCREEN-ROOM-ID.
+           05 LINE 10 COLUMN 4 VALUE "Press ENTER TO confirm choice".
+           05 LINE 11 COLUMN 4 VALUE"Use F1-8 to change colour scheme!".
 
        01 KIOSK-SELECTION-SCREEN-INVENTORY
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
-           05 BLANK SCREEN.
-           05 LINE 2 COLUMN 4 PIC X(64) FROM INV-HEADER.
-           05 LINE 3 COLUMN 4 VALUE "ID  PRICE  NAME".
-           05 LINE 3 COLUMN 30 VALUE "ID  PRICE  NAME".
-           05 LINE 3 COLUMN 58 VALUE "ID  PRICE  NAME".
+           05 LINE 21 COLUMN 4 PIC X(64) FROM INV-HEADER.
+           05 LINE 22 COLUMN 4 VALUE "ID  PRICE  NAME".
+           05 LINE 22 COLUMN 30 VALUE "ID  PRICE  NAME".
+           05 LINE 22 COLUMN 58 VALUE "ID  PRICE  NAME".
 
-           05 LINE 4 COLUMN 4 PIC X(26) FROM INV-LINE(1).
-           05 LINE 4 COLUMN 30 PIC X(26) FROM INV-LINE(11).
-           05 LINE 4 COLUMN 58 PIC X(26) FROM INV-LINE(21).
+           05 LINE 24 COLUMN 4 PIC X(26) FROM INV-LINE(1).
+           05 LINE 24 COLUMN 30 PIC X(26) FROM INV-LINE(11).
+           05 LINE 24 COLUMN 58 PIC X(26) FROM INV-LINE(21).
 
-           05 LINE 5 COLUMN 4 PIC X(26) FROM INV-LINE(2).
-           05 LINE 5 COLUMN 30 PIC X(26) FROM INV-LINE(12).
-           05 LINE 5 COLUMN 58 PIC X(26) FROM INV-LINE(22).
+           05 LINE 25 COLUMN 4 PIC X(26) FROM INV-LINE(2).
+           05 LINE 25 COLUMN 30 PIC X(26) FROM INV-LINE(12).
+           05 LINE 25 COLUMN 58 PIC X(26) FROM INV-LINE(22).
 
-           05 LINE 6 COLUMN 4 PIC X(26) FROM INV-LINE(3).
-           05 LINE 6 COLUMN 30 PIC X(26) FROM INV-LINE(13).
-           05 LINE 6 COLUMN 58 PIC X(26) FROM INV-LINE(23).
+           05 LINE 26 COLUMN 4 PIC X(26) FROM INV-LINE(3).
+           05 LINE 26 COLUMN 30 PIC X(26) FROM INV-LINE(13).
+           05 LINE 26 COLUMN 58 PIC X(26) FROM INV-LINE(23).
 
-           05 LINE 7 COLUMN 4 PIC X(26) FROM INV-LINE(4).
-           05 LINE 7 COLUMN 30 PIC X(26) FROM INV-LINE(14).
-           05 LINE 7 COLUMN 58 PIC X(26) FROM INV-LINE(24).
+           05 LINE 27 COLUMN 4 PIC X(26) FROM INV-LINE(4).
+           05 LINE 27 COLUMN 30 PIC X(26) FROM INV-LINE(14).
+           05 LINE 27 COLUMN 58 PIC X(26) FROM INV-LINE(24).
 
-           05 LINE 8 COLUMN 4 PIC X(26) FROM INV-LINE(5).
-           05 LINE 8 COLUMN 30 PIC X(26) FROM INV-LINE(15).
-           05 LINE 8 COLUMN 58 PIC X(26) FROM INV-LINE(25).
+           05 LINE 28 COLUMN 4 PIC X(26) FROM INV-LINE(5).
+           05 LINE 28 COLUMN 30 PIC X(26) FROM INV-LINE(15).
+           05 LINE 28 COLUMN 58 PIC X(26) FROM INV-LINE(25).
 
-           05 LINE 9 COLUMN 4 PIC X(26) FROM INV-LINE(6).
-           05 LINE 9 COLUMN 30 PIC X(26) FROM INV-LINE(16).
-           05 LINE 9 COLUMN 58 PIC X(26) FROM INV-LINE(26).
+           05 LINE 29 COLUMN 4 PIC X(26) FROM INV-LINE(6).
+           05 LINE 29 COLUMN 30 PIC X(26) FROM INV-LINE(16).
+           05 LINE 29 COLUMN 58 PIC X(26) FROM INV-LINE(26).
 
-           05 LINE 10 COLUMN 4 PIC X(26) FROM INV-LINE(7).
-           05 LINE 10 COLUMN 30 PIC X(26) FROM INV-LINE(17).
-           05 LINE 10 COLUMN 58 PIC X(26) FROM INV-LINE(27).
+           05 LINE 30 COLUMN 4 PIC X(26) FROM INV-LINE(7).
+           05 LINE 30 COLUMN 30 PIC X(26) FROM INV-LINE(17).
+           05 LINE 30 COLUMN 58 PIC X(26) FROM INV-LINE(27).
 
-           05 LINE 11 COLUMN 4 PIC X(26) FROM INV-LINE(8).
-           05 LINE 11 COLUMN 30 PIC X(26) FROM INV-LINE(18).
-           05 LINE 11 COLUMN 58 PIC X(26) FROM INV-LINE(28).
+           05 LINE 31 COLUMN 4 PIC X(26) FROM INV-LINE(8).
+           05 LINE 31 COLUMN 30 PIC X(26) FROM INV-LINE(18).
+           05 LINE 31 COLUMN 58 PIC X(26) FROM INV-LINE(28).
 
-           05 LINE 12 COLUMN 4 PIC X(26) FROM INV-LINE(9).
-           05 LINE 12 COLUMN 30 PIC X(26) FROM INV-LINE(19).
-           05 LINE 12 COLUMN 58 PIC X(26) FROM INV-LINE(29).
+           05 LINE 32 COLUMN 4 PIC X(26) FROM INV-LINE(9).
+           05 LINE 32 COLUMN 30 PIC X(26) FROM INV-LINE(19).
+           05 LINE 32 COLUMN 58 PIC X(26) FROM INV-LINE(29).
 
-           05 LINE 13 COLUMN 4 PIC X(26) FROM INV-LINE(10).
-           05 LINE 13 COLUMN 30 PIC X(26) FROM INV-LINE(20).
-           05 LINE 13 COLUMN 58 PIC X(26) FROM INV-LINE(30).
-
-           05 LINE 15 COLUMN 4 VALUE "Press Enter to continue.".
+           05 LINE 33 COLUMN 4 PIC X(26) FROM INV-LINE(10).
+           05 LINE 33 COLUMN 30 PIC X(26) FROM INV-LINE(20).
+           05 LINE 33 COLUMN 58 PIC X(26) FROM INV-LINE(30).
 
        01 KIOSK-SELECTION-SCREEN-START
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
            05 BLANK SCREEN.
-           05 LINE 2 COLUMN 4 VALUE "HERE BE DRAGONS".
+           05 LINE 2 COLUMN 4 VALUE
+               "What would you like to buy from the".
+           05 LINE 4 COLUMN 4 VALUE "  .###:   ##   #####.   ##   #  " &
+      -        "          ####### #    # ##### ".
+           05 LINE 5 COLUMN 4 VALUE " .#: .# :#  #: #   :# :#  #: #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 6 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 7 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 8 COLUMN 4 VALUE " #      #    # #####. #    # #  " &
+      -        "Stregsystem  #    #    #   #   ".
+           05 LINE 9 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 10 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# # " &
+      -        "              #    #    #   #   ".
+           05 LINE 11 COLUMN 4 VALUE " .#: .  :#  #: #   :# :#  #: # " &
+      -        "              #    #:  :#   #   ".
+           05 LINE 12 COLUMN 4 VALUE "  :###:   ##   #####.   ##   ##" &
+      -        "####          #     ####  ##### ".
+           05 LINE 14 COLUMN 4 VALUE "???".
 
        01 KIOSK-SELECTION-SCREEN-SELECT
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
-           05 LINE 8 COLUMN 12 PIC X(64) USING SCREEN-USERNAME.
-           05 LINE 9 COLUMN 12 PIC X(64) USING SCREEN-PRODUCT-ORDER.
-           05 LINE 10 COLUMN 5 VALUE "Press Enter to submit.".
+           05 LINE 16 COLUMN 4 VALUE "Username :".
+           05 LINE 16 COLUMN 15 PIC X(64) USING SCREEN-USERNAME.
+           05 LINE 17 COLUMN 4 VALUE "Buy Order:".
+           05 LINE 17 COLUMN 15 PIC X(64) USING SCREEN-PRODUCT-ORDER.
+           05 LINE 19 COLUMN 4 VALUE "Press ENTER to buy, Use arrow " &
+               "keys UP and DOWN to move around.".
 
        PROCEDURE DIVISION.
            PERFORM INIT-CONFIG
            PERFORM LOAD-CONFIG
            PERFORM INIT-DEFAULTS
            PERFORM MAIN-SELECTION.
-           PERFORM KIOSK-SELECTION.
+           IF SCREEN-MENU-CHOICE NOT = "3"
+               PERFORM KIOSK-SELECTION
+           END-IF.
 
            PERFORM SAVE-CONFIG.
 
            GOBACK.
+
 
        MAIN-SELECTION.
            MOVE 0 TO DONE
