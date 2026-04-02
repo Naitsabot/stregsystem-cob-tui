@@ -146,7 +146,11 @@ You should see version information if all tools are installed correctly.
 
 Becuase I didn't know, thats why. Also it targets ANSI COBOL 85, and som IBM and MSV extentions, but i have no idea what I would do.
 
-[https://cobolforgcc.sourceforge.net/cobol_1.html#SEC2](https://cobolforgcc.sourceforge.net/cobol_1.html#SEC2)
+I love the quote from the documentation og tthe frontend, as to "why a COBOL compiler". It starts out with:
+
+> The use of the term 'COBOL' should not be taken as a representation that the COBOL for GCC system is an accurate, functional or complete implementation of the COBOL language
+
+[https://cobolforgcc.sourceforge.net/cobol_1.html#SEC1](https://cobolforgcc.sourceforge.net/cobol_1.html#SEC1)
 
 ### Installing the TUI
 
