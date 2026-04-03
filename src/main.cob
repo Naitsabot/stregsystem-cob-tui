@@ -39,6 +39,7 @@
       *             Added Success/fail screen.
       *             Added buy logic when buying.
       *      1.1.0: Added install and uninstall method. played with env.
+      *      1.1.1: Fix formatting a bit
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

@@ -112,8 +112,8 @@
            05 LINE 12 COLUMN 4 VALUE "  :###:   ##   #####.   ##   ##" &
       -        "####          #     ####  ##### ".
            05 LINE 14 COLUMN 4 VALUE "Choose an action:".
-           05 LINE 15 COLUMN 4 VALUE "1. Stregsystem (room ".
-           05 LINE 15 COLUMN 37 PIC X(8) FROM SCREEN-ROOM-ID.
+           05 LINE 15 COLUMN 4 VALUE "1. Stregsystem (room    )".
+           05 LINE 15 COLUMN 25 PIC X(3) FROM SCREEN-ROOM-ID.
            05 LINE 16 COLUMN 4 VALUE "2. Enter other room".
            05 LINE 17 COLUMN 4 VALUE "3. Quit".
            05 LINE 19 COLUMN 4 VALUE "Choice:".
