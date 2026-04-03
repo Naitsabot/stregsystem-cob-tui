@@ -31,6 +31,7 @@
       *     a0.4.2: Add first part of TUI using SCREEN SECTION.
       *     a0.4.3: Load configs, and refactor temp files
       *     a0.4.4; Add active produts screen
+      *     a0.4.5: Even cooler TUI
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
