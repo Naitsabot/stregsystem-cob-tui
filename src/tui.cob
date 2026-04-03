@@ -47,8 +47,14 @@
        01 FEEDBACK-DATA.
            05 FEEDBACK-LINE      PIC X(80) VALUE "STATUS STRING HERE".
 
+       01 ORDER-RESULT-DATA.
+           05 RESULT-TITLE       PIC X(80).
+           05 RESULT-LINE1       PIC X(80).
+           05 RESULT-LINE2       PIC X(80).
+           05 RESULT-LINE3       PIC X(80).
+
        01 lookup-work.
-           05 member-id       PIC X(5).
+           05 member-id       PIC X(8).
            05 member-id-raw   PIC X(50).
 
        01 config-work.
@@ -221,6 +227,34 @@
            05 LINE 19 COLUMN 4 VALUE "Press ENTER to buy. Use arrow " &
                "keys UP and DOWN to move around.".
 
+       01 ORDER-RESULT-SCREEN
+           BACKGROUND-COLOR BG-COLOUR
+           FOREGROUND-COLOR FG-COLOUR.
+           05 BLANK SCREEN.
+           05 LINE 2 COLUMN 4 PIC X(80) FROM RESULT-TITLE.
+           05 LINE 4 COLUMN 4 VALUE "  .###:   ##   #####.   ##   #  " &
+      -        "          ####### #    # ##### ".
+           05 LINE 5 COLUMN 4 VALUE " .#: .# :#  #: #   :# :#  #: #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 6 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 7 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 8 COLUMN 4 VALUE " #      #    # #####. #    # #  " &
+      -        "Stregsystem  #    #    #   #   ".
+           05 LINE 9 COLUMN 4 VALUE " #      #    # #   :# #    # #  " &
+      -        "             #    #    #   #   ".
+           05 LINE 10 COLUMN 4 VALUE " #:     #.  .# #    # #.  .# # " &
+      -        "              #    #    #   #   ".
+           05 LINE 11 COLUMN 4 VALUE " .#: .  :#  #: #   :# :#  #: # " &
+      -        "              #    #:  :#   #   ".
+           05 LINE 12 COLUMN 4 VALUE "  :###:   ##   #####.   ##   ##" &
+      -        "####          #     ####  ##### ".
+           05 LINE 14 COLUMN 4 PIC X(80) FROM RESULT-LINE1.
+           05 LINE 15 COLUMN 4 PIC X(80) FROM RESULT-LINE2.
+           05 LINE 16 COLUMN 4 PIC X(80) FROM RESULT-LINE3.
+           05 LINE 18 COLUMN 4 VALUE "Press ENTER to continue.".
+
        PROCEDURE DIVISION.
            PERFORM INIT-CONFIG
            PERFORM LOAD-CONFIG
@@ -266,10 +300,87 @@
                DISPLAY KIOSK-SELECTION-SCREEN-INVENTORY
                DISPLAY KIOSK-SELECTION-SCREEN-SELECT
                ACCEPT KIOSK-SELECTION-SCREEN-SELECT
-
+               IF CRT-STATUS = 0 AND
+                   FUNCTION TRIM(SCREEN-PRODUCT-ORDER) NOT = SPACES
+                   PERFORM BUY-ORDER
+               END-IF
                PERFORM HANDLE-KEY-COLOR
            END-PERFORM.
            PERFORM SAVE-CONFIG.
+
+       BUY-ORDER.
+           MOVE SPACES TO RESULT-TITLE
+           MOVE SPACES TO RESULT-LINE1
+           MOVE SPACES TO RESULT-LINE2
+           MOVE SPACES TO RESULT-LINE3
+
+           IF FUNCTION TRIM(SCREEN-USERNAME) = SPACES
+               MOVE "Order failed" TO RESULT-TITLE
+               MOVE "Please enter a username first." TO RESULT-LINE1
+               PERFORM SHOW-ORDER-RESULT
+               EXIT PARAGRAPH
+           END-IF
+
+           MOVE SPACES TO api-request-data
+           MOVE "xGET_MEMBER_ID" TO api-operation
+           MOVE SCREEN-USERNAME TO api-username
+
+           CALL "STREGSYSTEM-API" USING
+               api-request-data
+               api-response-data
+           END-CALL
+
+           IF api-response-status NOT = 0
+               MOVE "Order failed" TO RESULT-TITLE
+               MOVE "Could not resolve member id." TO RESULT-LINE1
+               PERFORM SHOW-ORDER-RESULT
+               EXIT PARAGRAPH
+           END-IF
+
+           MOVE api-response-body TO member-id-raw
+           INSPECT member-id-raw
+               REPLACING ALL LOW-VALUE BY SPACE
+           INSPECT member-id-raw REPLACING ALL X"0A" BY SPACE
+           INSPECT member-id-raw REPLACING ALL X"0D" BY SPACE
+           MOVE FUNCTION TRIM(member-id-raw) TO member-id
+
+           IF FUNCTION TRIM(member-id) = SPACES OR
+               FUNCTION LOWER-CASE(FUNCTION TRIM(member-id)) = "null"
+               MOVE "Order failed" TO RESULT-TITLE
+               MOVE "Could not resolve member id." TO RESULT-LINE1
+               PERFORM SHOW-ORDER-RESULT
+               EXIT PARAGRAPH
+           END-IF
+           MOVE SPACES TO api-request-data
+           MOVE "xPOST_SALE" TO api-operation
+           MOVE member-id TO api-member-id
+           MOVE SCREEN-PRODUCT-ORDER TO api-order
+           MOVE SCREEN-ROOM-ID TO api-room-id
+           MOVE SCREEN-USERNAME TO api-username
+
+           CALL "STREGSYSTEM-API" USING
+               api-request-data
+               api-response-data
+           END-CALL
+
+           IF api-response-status = 0 AND sale-status = 200
+               MOVE "Your order was successful!" TO RESULT-TITLE
+               MOVE "Thanks for using the" TO RESULT-LINE1
+               MOVE "COBOL stregsystem TUI" TO RESULT-LINE2
+               MOVE FUNCTION TRIM(sale-message) TO RESULT-LINE3
+           ELSE
+               MOVE "Order failed" TO RESULT-TITLE
+               MOVE "Reason:" TO RESULT-LINE1
+               MOVE FUNCTION TRIM(sale-message) TO RESULT-LINE2
+               MOVE "Please try again." TO RESULT-LINE3
+           END-IF
+
+           PERFORM SHOW-ORDER-RESULT
+           MOVE SPACES TO SCREEN-PRODUCT-ORDER.
+
+       SHOW-ORDER-RESULT.
+           DISPLAY ORDER-RESULT-SCREEN
+           ACCEPT ORDER-RESULT-SCREEN.
 
        KIOSK-INVENTORY-LOAD.
            MOVE SPACES TO INV-LINES

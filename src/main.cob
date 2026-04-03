@@ -34,6 +34,10 @@
       *     a0.4.5: Even cooler TUI
       *     a0.4.6: refactor weird coding convention.
       *             add more lines to kiosk screen
+      *             Changed colours
+      *      1.0.0: Fully working system!
+      *             Added Success/fail screen
+      *             Added buy logic when buying
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

@@ -12,18 +12,18 @@
        WORKING-STORAGE SECTION.
       * X(32) means a fixed-length alphanumeric string of 32 characters
       * A(32) means a fixed-length alphabetic string of 32 characters
-       01  GREETING-MESSAGE     PIC X(32).
-       01  SCREEN-INPUTS.
-           05  SCREEN-USERNAME   PIC X(64).
-           05  SCREEN-ORDER      PIC X(64).
-           05  SCREEN-ROOM-ID    PIC X(8).
+       01 GREETING-MESSAGE             PIC X(32).
+       01 SCREEN-INPUTS.
+           05 SCREEN-USERNAME          PIC X(64).
+           05 SCREEN-ORDER             PIC X(64).
+           05 SCREEN-ROOM-IDPIC X(8).
 
-       01  FEEDBACK-DATA.
-           05  FEEDBACK-LINE     PIC X(80).
+       01 FEEDBACK-DATA.
+           05 FEEDBACK-LINE            PIC X(80).
 
-       01  lookup-work.
-           05  ws-member-id       PIC X(8).
-           05  ws-member-id-raw   PIC X(64).
+       01 lookup-work.
+           05 ws-member-id             PIC X(8).
+           05 ws-member-id-raw         PIC X(64).
 
        COPY "copybooks/api-request.cpy".
        COPY "copybooks/api-response.cpy".

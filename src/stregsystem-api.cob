@@ -134,11 +134,10 @@
       *   }
       * }
        API-xGET-ACTIVE-PRODUCTS.
-           IF api-log-level >= 1
-               DISPLAY "Fetching active products for room "
-               api-room-id "..."
-           END-IF
-
+          IF api-log-level >= 2
+              DISPLAY "Request path: " FUNCTION TRIM(req-path)
+              DISPLAY "Request body: " FUNCTION TRIM(req-body)
+          END-IF
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
            STRING
@@ -453,6 +452,8 @@
            END-STRING
 
            IF api-log-level >= 2
+               DISPLAY "POST_SALE member id: "
+                   FUNCTION TRIM(api-member-id)
                DISPLAY "Request path: " FUNCTION TRIM(req-path)
                DISPLAY "Request body: " FUNCTION TRIM(req-body)
            END-IF
