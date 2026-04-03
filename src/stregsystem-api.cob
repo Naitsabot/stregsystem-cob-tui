@@ -696,5 +696,5 @@
       *    Read environment variable for API configuration
            ACCEPT api-url FROM ENVIRONMENT "STREGSYSTEM_URL"
            IF api-url = SPACES
-               MOVE "http://localhost:8000" TO api-url
+               MOVE "https://stregsystem.fklub.dk" TO api-url
            END-IF.

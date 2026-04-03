@@ -29,15 +29,16 @@
       *             decoding added. updated tests. added copybooks.
       *     a0.4.1: Add simple screen section example.
       *     a0.4.2: Add first part of TUI using SCREEN SECTION.
-      *     a0.4.3: Load configs, and refactor temp files
-      *     a0.4.4; Add active produts screen
-      *     a0.4.5: Even cooler TUI
+      *     a0.4.3: Load configs, and refactor temp files.
+      *     a0.4.4; Add active produts screen.
+      *     a0.4.5: Even cooler TUI.
       *     a0.4.6: refactor weird coding convention.
-      *             add more lines to kiosk screen
-      *             Changed colours
+      *             add more lines to kiosk screen.
+      *             Changed colours.
       *      1.0.0: Fully working system!
-      *             Added Success/fail screen
-      *             Added buy logic when buying
+      *             Added Success/fail screen.
+      *             Added buy logic when buying.
+      *      1.1.0: Added install and uninstall method. played with env.
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.

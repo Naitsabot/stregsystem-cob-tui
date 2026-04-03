@@ -60,9 +60,27 @@ You should see version information if all tools are installed correctly.
 
 ### Installing the TUI
 
-Not implemented yet. When it is, there will probably be a package or install script here.
+User-local install (no sudo, no drama):
 
-`¯\_(ツ)_/¯`
+```bash
+bash ./install.sh
+```
+
+This drops a `stregsystemcobtui` binary in `~/.local/bin`.
+
+Uninstall:
+
+```bash
+bash ./uninstall.sh
+```
+
+This only removes the binary; your config stays put.
+
+If you want to nuke config too:
+
+```bash
+bash ./uninstall.sh --purge
+```
 
 ## Usage
 
@@ -74,7 +92,9 @@ make clean  # Clean build artifacts
 
 ### Configuration
 
-Set the API URL if you are not running locally:
+Default API: `https://stregsystem.fklub.dk`
+
+Set the API URL if you are not running that:
 
 ```bash
 export STREGSYSTEM_URL="http://localhost:8000"
