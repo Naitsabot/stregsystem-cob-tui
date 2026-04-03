@@ -115,7 +115,7 @@
        01 ROOM-SELECTION-SCREEN
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
-           
+
            05 BLANK SCREEN.
            05 LINE 2 COLUMN 4 VALUE "Choose one of the".
            05 LINE 2 COLUMN 22 VALUE " following rooms".
@@ -434,36 +434,36 @@
        HANDLE-KEY-COLOR.
            EVALUATE CRT-STATUS
                WHEN KEY-F1
-                   MOVE 0 TO BG-COLOUR
+                   MOVE 0 TO BG-COLOUR *> sort
                    MOVE 7 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F2
-                   MOVE 1 TO BG-COLOUR
+                   MOVE 1 TO BG-COLOUR *> blå
                    MOVE 7 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F3
-                   MOVE 2 TO BG-COLOUR
-                   MOVE 7 TO FG-COLOUR
+                   MOVE 2 TO BG-COLOUR *> grøn/lime
+                   MOVE 5 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F4
-                   MOVE 3 TO BG-COLOUR
-                   MOVE 7 TO FG-COLOUR
+                   MOVE 3 TO BG-COLOUR *> blå/lyseblå
+                   MOVE 1 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F5
-                   MOVE 4 TO BG-COLOUR
-                   MOVE 7 TO FG-COLOUR
+                   MOVE 4 TO BG-COLOUR *> rød
+                   MOVE 6 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F6
-                   MOVE 5 TO BG-COLOUR
+                   MOVE 5 TO BG-COLOUR *> lilla
                    MOVE 7 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F7
-                   MOVE 6 TO BG-COLOUR
+                   MOVE 6 TO BG-COLOUR *> grim gul
                    MOVE 0 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN KEY-F8
-                   MOVE 7 TO BG-COLOUR
-                   MOVE 0 TO FG-COLOUR
+                   MOVE 7 TO BG-COLOUR *> hvid
+                   MOVE 4 TO FG-COLOUR
                    PERFORM SAVE-CONFIG
                WHEN OTHER
                    MOVE 1 TO DONE
