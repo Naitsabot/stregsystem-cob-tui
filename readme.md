@@ -126,9 +126,9 @@ pacman -S curl jq
 
 #### Why not the cobol frontend for gcc?
 
-Becuase I didn't know, thats why. Also it targets ANSI COBOL 85, and som IBM and MSV extentions, but i have no idea what I would do.
+Because I didn't know, that's why. Also it targets ANSI COBOL 85, and some IBM and MSV extensions, but i have no idea what I would do.
 
-I love the quote from the documentation og tthe frontend, as to "why a COBOL compiler". It starts out with:
+I love the quote from the documentation og the frontend, as to "why a COBOL compiler". It starts out with:
 
 > The use of the term 'COBOL' should not be taken as a representation that the COBOL for GCC system is an accurate, functional or complete implementation of the COBOL language
 

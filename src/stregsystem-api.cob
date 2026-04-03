@@ -22,26 +22,26 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD  HTTP-RESPONSE-FILE.
-        01  HTTP-RESPONSE-LINE   PIC X(8192).
+       FD HTTP-RESPONSE-FILE.
+       01 HTTP-RESPONSE-LINE   PIC X(8192).
 
        WORKING-STORAGE SECTION.
       * HTTP client request structure
        COPY "copybooks/http-request.cpy".
        COPY "copybooks/http-response-status.cpy".
-       01  buystring            PIC X(100).
+       01 buystring            PIC X(100).
 
       * Temp file paths
-         01  WS-TEMP-DIR          PIC X(256).
-         01  WS-TEMP-DIR-ENV      PIC X(256).
-         01  WS-HTTP-RESPONSE-PATH PIC X(256).
-         01  WS-TEMP-CMD          PIC X(512).
+       01 WS-TEMP-DIR          PIC X(256).
+       01 WS-TEMP-DIR-ENV      PIC X(256).
+       01 WS-HTTP-RESPONSE-PATH PIC X(256).
+       01 WS-TEMP-CMD          PIC X(512).
 
       * JSON decoder variables
-       01  json-input           PIC X(8192).
-       01  parse-operation      PIC X(20).
-       01  parsed-output        PIC X(8192).
-       01  parse-status         PIC S9(9) COMP-5.
+       01 json-input           PIC X(8192).
+       01 parse-operation      PIC X(20).
+       01 parsed-output        PIC X(8192).
+       01 parse-status         PIC S9(9) COMP-5.
 
       * Parsed structures
        COPY "copybooks/parsed-member-info.cpy".
@@ -49,20 +49,20 @@
        COPY "copybooks/product-dictionary.cpy".
 
       * Response parsing helpers
-       01  response-pos        PIC 9(5) COMP-5.
-       01  response-eof        PIC 9 VALUE 0.
-       01  line-pos            PIC 9(5) COMP-5.
-       01  product-line        PIC X(256).
-       01  WS-IDX              PIC 99 COMP-5.
+       01 response-pos        PIC 9(5) COMP-5.
+       01 response-eof        PIC 9 VALUE 0.
+       01 line-pos            PIC 9(5) COMP-5.
+       01 product-line        PIC X(256).
+       01 WS-IDX              PIC 99 COMP-5.
 
       * logging control
-       01  logging-control.
-           05  api-init-done    PIC 9 VALUE 0.
-           05  api-log-level    PIC 9 VALUE 0.
-           05  api-env-val      PIC X(10).
+       01 logging-control.
+           05 api-init-done    PIC 9 VALUE 0.
+           05 api-log-level    PIC 9 VALUE 0.
+           05 api-env-val      PIC X(10).
 
       * API configuration
-       01  api-url              PIC X(200).
+       01 api-url              PIC X(200).
 
        LINKAGE SECTION.
        COPY "copybooks/api-request.cpy".

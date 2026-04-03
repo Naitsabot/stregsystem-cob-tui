@@ -25,54 +25,57 @@
 
        WORKING-STORAGE SECTION.
 
-       78  KEY-F1            VALUE 1001.
-       78  KEY-F2            VALUE 1002.
-       78  KEY-F3            VALUE 1003.
-       78  KEY-F4            VALUE 1004.
-       78  KEY-F5            VALUE 1005.
-       78  KEY-F6            VALUE 1006.
-       78  KEY-F7            VALUE 1007.
-       78  KEY-F8            VALUE 1008.
+       78 KEY-F1            VALUE 1001.
+       78 KEY-F2            VALUE 1002.
+       78 KEY-F3            VALUE 1003.
+       78 KEY-F4            VALUE 1004.
+       78 KEY-F5            VALUE 1005.
+       78 KEY-F6            VALUE 1006.
+       78 KEY-F7            VALUE 1007.
+       78 KEY-F8            VALUE 1008.
 
-       01  CRT-STATUS        PIC 9(4) VALUE 0.
-       01  DONE              PIC 9 VALUE 0.
-       01  BG-COLOUR         PIC 9 VALUE 3.
-       01  FG-COLOUR         PIC 9 VALUE 7.
-       01  SCREEN-INPUTS.
+       01 CRT-STATUS        PIC 9(4) VALUE 0.
+       01 DONE              PIC 9 VALUE 0.
+       01 BG-COLOUR         PIC 9 VALUE 3.
+       01 FG-COLOUR         PIC 9 VALUE 7.
+       01 SCREEN-INPUTS.
            05 SCREEN-MENU-CHOICE PIC x(1).
            05 SCREEN-USERNAME    PIC X(64).
            05 SCREEN-PRODUCT-ORDER  PIC X(64).
            05 SCREEN-ROOM-ID     PIC X(8).
 
-       01  FEEDBACK-DATA.
+       01 FEEDBACK-DATA.
            05 FEEDBACK-LINE      PIC X(80) VALUE "STATUS STRING HERE".
 
-       01  lookup-work.
-           05  member-id       PIC X(5).
-           05  member-id-raw   PIC X(50).
+       01 lookup-work.
+           05 member-id       PIC X(5).
+           05 member-id-raw   PIC X(50).
 
-       01  config-work.
-           05  HOME-DIR         PIC X(256).
-           05  CONFIG-DIR       PIC X(256).
-           05  CONFIG-PATH      PIC X(256).
-           05  CONFIG-STATUS    PIC XX.
-           05  CONFIG-KEY       PIC X(64).
-           05  CONFIG-VALUE     PIC X(128).
-           05  CONFIG-NUM-TEXT  PIC X(16).
-           05  CONFIG-CMD       PIC X(512).
-           05  CONFIG-EOF       PIC 9 VALUE 0.
+       01 config-work.
+           05 HOME-DIR         PIC X(256).
+           05 CONFIG-DIR       PIC X(256).
+           05 CONFIG-PATH      PIC X(256).
+           05 CONFIG-STATUS    PIC XX.
+           05 CONFIG-KEY       PIC X(64).
+           05 CONFIG-VALUE     PIC X(128).
+           05 CONFIG-NUM-TEXT  PIC X(16).
+           05 CONFIG-CMD       PIC X(512).
+           05 CONFIG-EOF       PIC 9 VALUE 0.
 
-       01  inventory-work.
-           05  INV-HEADER       PIC X(64).
-           05  INV-LINES.
-               10  INV-LINE     OCCURS 30 TIMES PIC X(26).
-           05  INV-COUNT        PIC 9(3) COMP-5.
-           05  INV-ID           PIC X(10).
-           05  INV-NAME         PIC X(50).
-           05  INV-PRICE        PIC X(20).
-           05  INV-LINE-RAW     PIC X(256).
-           05  INV-POS          PIC 9(5) COMP-5.
-           05  INV-IDX          PIC 99 COMP-5.
+       01 inventory-work.
+           05 INV-HEADER       PIC X(64).
+           05 INV-LINES.
+               10 INV-LINE     OCCURS 32 TIMES PIC X(36).
+           05 INV-COUNT        PIC 9(3) COMP-5.
+           05 INV-ID           PIC X(10).
+           05 INV-NAME         PIC X(50).
+           05 INV-PRICE        PIC X(20).
+           05 INV-ID-DISP      PIC X(6).
+           05 INV-PRICE-DISP   PIC X(8).
+           05 INV-NAME-DISP    PIC X(18).
+           05 INV-LINE-RAW     PIC X(256).
+           05 INV-POS          PIC 9(5) COMP-5.
+           05 INV-IDX          PIC 99 COMP-5.
 
        COPY "copybooks/api-request.cpy".
        COPY "copybooks/api-response.cpy".
@@ -131,49 +134,56 @@
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
            05 LINE 21 COLUMN 4 PIC X(64) FROM INV-HEADER.
-           05 LINE 22 COLUMN 4 VALUE "ID  PRICE  NAME".
-           05 LINE 22 COLUMN 30 VALUE "ID  PRICE  NAME".
-           05 LINE 22 COLUMN 58 VALUE "ID  PRICE  NAME".
+           05 LINE 22 COLUMN 4 VALUE "ID    PRICE    NAME".
+           05 LINE 22 COLUMN 42 VALUE "ID    PRICE    NAME".
 
-           05 LINE 24 COLUMN 4 PIC X(26) FROM INV-LINE(1).
-           05 LINE 24 COLUMN 30 PIC X(26) FROM INV-LINE(11).
-           05 LINE 24 COLUMN 58 PIC X(26) FROM INV-LINE(21).
+           05 LINE 24 COLUMN 4 PIC X(36) FROM INV-LINE(1).
+           05 LINE 24 COLUMN 42 PIC X(36) FROM INV-LINE(17).
 
-           05 LINE 25 COLUMN 4 PIC X(26) FROM INV-LINE(2).
-           05 LINE 25 COLUMN 30 PIC X(26) FROM INV-LINE(12).
-           05 LINE 25 COLUMN 58 PIC X(26) FROM INV-LINE(22).
+           05 LINE 25 COLUMN 4 PIC X(36) FROM INV-LINE(2).
+           05 LINE 25 COLUMN 42 PIC X(36) FROM INV-LINE(18).
 
-           05 LINE 26 COLUMN 4 PIC X(26) FROM INV-LINE(3).
-           05 LINE 26 COLUMN 30 PIC X(26) FROM INV-LINE(13).
-           05 LINE 26 COLUMN 58 PIC X(26) FROM INV-LINE(23).
+           05 LINE 26 COLUMN 4 PIC X(36) FROM INV-LINE(3).
+           05 LINE 26 COLUMN 42 PIC X(36) FROM INV-LINE(19).
 
-           05 LINE 27 COLUMN 4 PIC X(26) FROM INV-LINE(4).
-           05 LINE 27 COLUMN 30 PIC X(26) FROM INV-LINE(14).
-           05 LINE 27 COLUMN 58 PIC X(26) FROM INV-LINE(24).
+           05 LINE 27 COLUMN 4 PIC X(36) FROM INV-LINE(4).
+           05 LINE 27 COLUMN 42 PIC X(36) FROM INV-LINE(20).
 
-           05 LINE 28 COLUMN 4 PIC X(26) FROM INV-LINE(5).
-           05 LINE 28 COLUMN 30 PIC X(26) FROM INV-LINE(15).
-           05 LINE 28 COLUMN 58 PIC X(26) FROM INV-LINE(25).
+           05 LINE 28 COLUMN 4 PIC X(36) FROM INV-LINE(5).
+           05 LINE 28 COLUMN 42 PIC X(36) FROM INV-LINE(21).
 
-           05 LINE 29 COLUMN 4 PIC X(26) FROM INV-LINE(6).
-           05 LINE 29 COLUMN 30 PIC X(26) FROM INV-LINE(16).
-           05 LINE 29 COLUMN 58 PIC X(26) FROM INV-LINE(26).
+           05 LINE 29 COLUMN 4 PIC X(36) FROM INV-LINE(6).
+           05 LINE 29 COLUMN 42 PIC X(36) FROM INV-LINE(22).
 
-           05 LINE 30 COLUMN 4 PIC X(26) FROM INV-LINE(7).
-           05 LINE 30 COLUMN 30 PIC X(26) FROM INV-LINE(17).
-           05 LINE 30 COLUMN 58 PIC X(26) FROM INV-LINE(27).
+           05 LINE 30 COLUMN 4 PIC X(36) FROM INV-LINE(7).
+           05 LINE 30 COLUMN 42 PIC X(36) FROM INV-LINE(23).
 
-           05 LINE 31 COLUMN 4 PIC X(26) FROM INV-LINE(8).
-           05 LINE 31 COLUMN 30 PIC X(26) FROM INV-LINE(18).
-           05 LINE 31 COLUMN 58 PIC X(26) FROM INV-LINE(28).
+           05 LINE 31 COLUMN 4 PIC X(36) FROM INV-LINE(8).
+           05 LINE 31 COLUMN 42 PIC X(36) FROM INV-LINE(24).
 
-           05 LINE 32 COLUMN 4 PIC X(26) FROM INV-LINE(9).
-           05 LINE 32 COLUMN 30 PIC X(26) FROM INV-LINE(19).
-           05 LINE 32 COLUMN 58 PIC X(26) FROM INV-LINE(29).
+           05 LINE 32 COLUMN 4 PIC X(36) FROM INV-LINE(9).
+           05 LINE 32 COLUMN 42 PIC X(36) FROM INV-LINE(25).
 
-           05 LINE 33 COLUMN 4 PIC X(26) FROM INV-LINE(10).
-           05 LINE 33 COLUMN 30 PIC X(26) FROM INV-LINE(20).
-           05 LINE 33 COLUMN 58 PIC X(26) FROM INV-LINE(30).
+           05 LINE 33 COLUMN 4 PIC X(36) FROM INV-LINE(10).
+           05 LINE 33 COLUMN 42 PIC X(36) FROM INV-LINE(26).
+
+           05 LINE 34 COLUMN 4 PIC X(36) FROM INV-LINE(11).
+           05 LINE 34 COLUMN 42 PIC X(36) FROM INV-LINE(27).
+
+           05 LINE 35 COLUMN 4 PIC X(36) FROM INV-LINE(12).
+           05 LINE 35 COLUMN 42 PIC X(36) FROM INV-LINE(28).
+
+           05 LINE 36 COLUMN 4 PIC X(36) FROM INV-LINE(13).
+           05 LINE 36 COLUMN 42 PIC X(36) FROM INV-LINE(29).
+
+           05 LINE 37 COLUMN 4 PIC X(36) FROM INV-LINE(14).
+           05 LINE 37 COLUMN 42 PIC X(36) FROM INV-LINE(30).
+
+           05 LINE 38 COLUMN 4 PIC X(36) FROM INV-LINE(15).
+           05 LINE 38 COLUMN 42 PIC X(36) FROM INV-LINE(31).
+
+           05 LINE 39 COLUMN 4 PIC X(36) FROM INV-LINE(16).
+           05 LINE 39 COLUMN 42 PIC X(36) FROM INV-LINE(32).
 
        01 KIOSK-SELECTION-SCREEN-START
            BACKGROUND-COLOR BG-COLOUR
@@ -208,7 +218,7 @@
            05 LINE 16 COLUMN 15 PIC X(64) USING SCREEN-USERNAME.
            05 LINE 17 COLUMN 4 VALUE "Buy Order:".
            05 LINE 17 COLUMN 15 PIC X(64) USING SCREEN-PRODUCT-ORDER.
-           05 LINE 19 COLUMN 4 VALUE "Press ENTER to buy, Use arrow " &
+           05 LINE 19 COLUMN 4 VALUE "Press ENTER to buy. Use arrow " &
                "keys UP and DOWN to move around.".
 
        PROCEDURE DIVISION.
@@ -297,7 +307,7 @@
                        WITH POINTER INV-POS
                    END-UNSTRING
                    IF FUNCTION TRIM(INV-LINE-RAW) NOT = SPACES
-                       IF INV-COUNT < 30
+                       IF INV-COUNT < 32
                            ADD 1 TO INV-COUNT
                            UNSTRING INV-LINE-RAW DELIMITED BY X"09"
                                INTO INV-ID
@@ -305,12 +315,19 @@
                                     INV-PRICE
                            END-UNSTRING
                            MOVE SPACES TO INV-LINE(INV-COUNT)
+                           MOVE SPACES TO INV-ID-DISP
+                           MOVE SPACES TO INV-PRICE-DISP
+                           MOVE SPACES TO INV-NAME-DISP
+                           MOVE FUNCTION TRIM(INV-ID) TO INV-ID-DISP
+                           MOVE FUNCTION TRIM(INV-PRICE)
+                               TO INV-PRICE-DISP
+                           MOVE FUNCTION TRIM(INV-NAME) TO INV-NAME-DISP
                            STRING
-                               FUNCTION TRIM(INV-ID) DELIMITED BY SIZE
+                               INV-ID-DISP DELIMITED BY SIZE
                                "  " DELIMITED BY SIZE
-                              FUNCTION TRIM(INV-PRICE) DELIMITED BY SIZE
+                               INV-PRICE-DISP DELIMITED BY SIZE
                                "  " DELIMITED BY SIZE
-                               FUNCTION TRIM(INV-NAME) DELIMITED BY SIZE
+                               INV-NAME-DISP DELIMITED BY SIZE
                                INTO INV-LINE(INV-COUNT)
                            END-STRING
                        END-IF

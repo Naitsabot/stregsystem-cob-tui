@@ -16,22 +16,22 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
       * Test data
-       01  test-json-input      PIC X(8192).
-       01  test-encode-input    PIC X(1024).
-       01  test-json-output     PIC X(2048).
-       01  test-parsed-output   PIC X(8192).
-       01  test-operation       PIC X(20).
-       01  test-status          PIC S9(9) COMP-5.
+       01 test-json-input      PIC X(8192).
+       01 test-encode-input    PIC X(1024).
+       01 test-json-output     PIC X(2048).
+       01 test-parsed-output   PIC X(8192).
+       01 test-operation       PIC X(20).
+       01 test-status          PIC S9(9) COMP-5.
 
       * Test member data
-       01  test-member-json     PIC X(512) VALUE
+       01 test-member-json     PIC X(512) VALUE
            '{"balance": 25000, "username": "testuser", "active": tru'
            & 'e, "name": "Test User"}'.
 
-       01  test-member-id-json  PIC X(256) VALUE
+       01 test-member-id-json  PIC X(256) VALUE
            '{"member_id": 321}'.
 
-       01  test-products-json   PIC X(1024) VALUE
+       01 test-products-json   PIC X(1024) VALUE
            '{"123": {"name": "Beer", "price": 600}, "124": {"name": '
            & '"Soda", "price": 400}}'.
 

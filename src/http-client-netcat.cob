@@ -17,25 +17,25 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  crlf                 PIC X(2) VALUE X"0D0A".
-       01  system-cmd           PIC X(2000).
-       01  system-cmd-full      PIC X(4400).
-       01  system-result        PIC S9(9) COMP-5.
-       01  body-length          PIC 9(5).
-       01  http-client-init-flag.
-           05  init-done        PIC 9 VALUE 0.
-           05  log-level        PIC 9 VALUE 0.
-           05  env-val          PIC X(10).
+       01 crlf                 PIC X(2) VALUE X"0D0A".
+       01 system-cmd           PIC X(2000).
+       01 system-cmd-full      PIC X(4400).
+       01 system-result        PIC S9(9) COMP-5.
+       01 body-length          PIC 9(5).
+       01 http-client-init-flag.
+           05 init-done        PIC 9 VALUE 0.
+           05 log-level        PIC 9 VALUE 0.
+           05 env-val          PIC X(10).
 
        LINKAGE SECTION.
-       01  http-request-data.
-           05  req-method       PIC X(10).
-           05  req-url          PIC X(200).
-           05  req-host         PIC X(100).
-           05  req-port         PIC X(10).
-           05  req-path         PIC X(200).
-           05  req-body         PIC X(1000).
-       01  http-response-status PIC S9(9) COMP-5.
+       01 http-request-data.
+           05 req-method       PIC X(10).
+           05 req-url          PIC X(200).
+           05 req-host         PIC X(100).
+           05 req-port         PIC X(10).
+           05 req-path         PIC X(200).
+           05 req-body         PIC X(1000).
+       01 http-response-status PIC S9(9) COMP-5.
 
        PROCEDURE DIVISION USING http-request-data
                                 http-response-status.

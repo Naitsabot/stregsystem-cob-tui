@@ -17,8 +17,8 @@
        COPY "copybooks/api-request.cpy".
        COPY "copybooks/api-response.cpy".
        COPY "copybooks/parsed-member-info.cpy".
-       01  WS-IDX               PIC 99 COMP-5.
-       01  display-limit        PIC 99 COMP-5.
+       01 WS-IDX               PIC 99 COMP-5.
+       01 display-limit        PIC 99 COMP-5.
 
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.

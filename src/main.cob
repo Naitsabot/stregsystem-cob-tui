@@ -32,6 +32,8 @@
       *     a0.4.3: Load configs, and refactor temp files
       *     a0.4.4; Add active produts screen
       *     a0.4.5: Even cooler TUI
+      *     a0.4.6: refactor weird coding convention.
+      *             add more lines to kiosk screen
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -43,13 +45,13 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  user-name            PIC A(30).
-       01  item                 PIC A(30).
-       01  user-choice          PIC 9.
-       01  test-thing           PIC X(4) VALUE "8000".
+       01 user-name            PIC A(30).
+       01 item                 PIC A(30).
+       01 user-choice          PIC 9.
+       01 test-thing           PIC X(4) VALUE "8000".
 
        SCREEN SECTION.
-       01  SIMPLE-SCREEN.
+       01 SIMPLE-SCREEN.
            05 BLANK SCREEN.
            05 LINE 2 COLUMN 5 VALUE "Screen section example".
            05 LINE 4 COLUMN 5 VALUE "Press Enter to continue.".

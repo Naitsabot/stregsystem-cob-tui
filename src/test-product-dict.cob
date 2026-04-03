@@ -22,8 +22,8 @@
        COPY "copybooks/parsed-products.cpy".
 
       * Required working variables
-       01  api-log-level        PIC 9 VALUE 0.
-       01  WS-IDX               PIC 99 COMP-5.
+       01 api-log-level        PIC 9 VALUE 0.
+       01 WS-IDX               PIC 99 COMP-5.
 
        PROCEDURE DIVISION.
 

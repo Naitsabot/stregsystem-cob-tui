@@ -25,58 +25,58 @@
 
        DATA DIVISION.
        FILE SECTION.
-        FD  JSON-INPUT.
-        01  JSON-INPUT-LINE     PIC X(8192).
-        FD  JSON-OUTPUT.
-        01  JSON-OUTPUT-LINE     PIC X(8192).
+        FD JSON-INPUT.
+        01 JSON-INPUT-LINE     PIC X(8192).
+        FD JSON-OUTPUT.
+        01 JSON-OUTPUT-LINE     PIC X(8192).
 
        WORKING-STORAGE SECTION.
       * JQ command configuration
-       01  jq-command           PIC X(8192).
-       01  jq-filter            PIC X(512).
-       01  jq-executable        PIC X(100) VALUE "jq".
-       01  jq-result            PIC S9(9) COMP-5.
-       01  temp-output-file     PIC X(100)
+       01 jq-command           PIC X(8192).
+       01 jq-filter            PIC X(512).
+       01 jq-executable        PIC X(100) VALUE "jq".
+       01 jq-result            PIC S9(9) COMP-5.
+       01 temp-output-file     PIC X(100)
            VALUE "temp-json-output.txt".
-       01  temp-input-file      PIC X(100)
+       01 temp-input-file      PIC X(100)
            VALUE "temp-json-input.txt".
-       01  temp-json-escaped    PIC X(8192).
+       01 temp-json-escaped    PIC X(8192).
 
       * Temp file paths
-       01  WS-TEMP-DIR          PIC X(256).
-       01  WS-TEMP-DIR-ENV      PIC X(256).
-       01  WS-JSON-INPUT-PATH   PIC X(256).
-       01  WS-JSON-OUTPUT-PATH  PIC X(256).
-       01  WS-TEMP-CMD          PIC X(512).
+       01 WS-TEMP-DIR          PIC X(256).
+       01 WS-TEMP-DIR-ENV      PIC X(256).
+       01 WS-JSON-INPUT-PATH   PIC X(256).
+       01 WS-JSON-OUTPUT-PATH  PIC X(256).
+       01 WS-TEMP-CMD          PIC X(512).
 
       * String processing for escaping
-       01  src-pos              PIC 9(5) COMP-5.
-       01  dest-pos             PIC 9(5) COMP-5.
-       01  src-len              PIC 9(5) COMP-5.
-       01  current-char         PIC X.
-       01  output-pos           PIC 9(5) COMP-5.
-       01  output-eof           PIC 9 VALUE 0.
-       01  input-pos            PIC 9(5) COMP-5.
-       01  input-line           PIC X(8192).
+       01 src-pos              PIC 9(5) COMP-5.
+       01 dest-pos             PIC 9(5) COMP-5.
+       01 src-len              PIC 9(5) COMP-5.
+       01 current-char         PIC X.
+       01 output-pos           PIC 9(5) COMP-5.
+       01 output-eof           PIC 9 VALUE 0.
+       01 input-pos            PIC 9(5) COMP-5.
+       01 input-line           PIC X(8192).
 
       * logging control
-       01  logging-control.
-           05  decoder-init-done PIC 9 VALUE 0.
-           05  decoder-log-level PIC 9 VALUE 0.
-           05  decoder-env-val   PIC X(10).
+       01 logging-control.
+           05 decoder-init-done PIC 9 VALUE 0.
+           05 decoder-log-level PIC 9 VALUE 0.
+           05 decoder-env-val   PIC X(10).
 
        LINKAGE SECTION.
       * Input: JSON string to parse
-       01  json-input-data      PIC X(8192).
+       01 json-input-data      PIC X(8192).
 
       * Input: Parse operation type
-       01  parse-operation      PIC X(20).
+       01 parse-operation      PIC X(20).
 
       * Output: Parsed data (structure depends on operation)
-       01  parsed-output-data   PIC X(8192).
+       01 parsed-output-data   PIC X(8192).
 
       * Output: Status code
-       01  parse-status         PIC S9(9) COMP-5.
+       01 parse-status         PIC S9(9) COMP-5.
 
        PROCEDURE DIVISION USING json-input-data
                                 parse-operation

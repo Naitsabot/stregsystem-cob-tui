@@ -16,19 +16,19 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  crlf                 PIC X(2) VALUE X"0D0A".
-       01  system-cmd           PIC X(2000).
-       01  system-cmd-full      PIC X(4400).
-       01  system-result        PIC S9(9) COMP-5.
-       01  body-length          PIC 9(5).
-       01  response-output-file PIC X(256).
-       01  WS-TEMP-DIR          PIC X(256).
-       01  WS-TEMP-DIR-ENV      PIC X(256).
-       01  WS-TEMP-CMD          PIC X(512).
-       01  http-client-init-flag.
-           05  init-done        PIC 9 VALUE 0.
-           05  log-level        PIC 9 VALUE 0.
-           05  env-val          PIC X(10).
+       01 crlf                 PIC X(2) VALUE X"0D0A".
+       01 system-cmd           PIC X(2000).
+       01 system-cmd-full      PIC X(4400).
+       01 system-result        PIC S9(9) COMP-5.
+       01 body-length          PIC 9(5).
+       01 response-output-file PIC X(256).
+       01 WS-TEMP-DIR          PIC X(256).
+       01 WS-TEMP-DIR-ENV      PIC X(256).
+       01 WS-TEMP-CMD          PIC X(512).
+       01 http-client-init-flag.
+           05 init-done        PIC 9 VALUE 0.
+           05 log-level        PIC 9 VALUE 0.
+           05 env-val          PIC X(10).
 
        LINKAGE SECTION.
        COPY "copybooks/http-request.cpy".

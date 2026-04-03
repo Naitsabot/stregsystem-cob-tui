@@ -18,21 +18,21 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  temp-string          PIC X(1024).
-       01  quote-char           PIC X VALUE '"'.
+       01 temp-string          PIC X(1024).
+       01 quote-char           PIC X VALUE '"'.
 
        LINKAGE SECTION.
       * Input: Encoding operation type
-       01  encode-operation     PIC X(20).
+       01 encode-operation     PIC X(20).
 
       * Input: Data to encode (structure varies by operation)
-       01  input-data           PIC X(1024).
+       01 input-data           PIC X(1024).
 
       * Output: JSON string
-       01  json-output          PIC X(2048).
+       01 json-output          PIC X(2048).
 
       * Output: Status code
-       01  encode-status        PIC S9(9) COMP-5.
+       01 encode-status        PIC S9(9) COMP-5.
 
        PROCEDURE DIVISION USING encode-operation
                                 input-data
