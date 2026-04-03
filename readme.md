@@ -4,7 +4,7 @@ A terminal user interface for the F-Klubben stregsystem, written in GnuCOBOL wit
 
 **Project Status**: Functional
 
-This thing is a love letter to old constraints with a modern API strapped on. It is supposed to be useful and a little weird.
+This project is a small TUI client for the F-Klubben stregsystem API.
 
 ## Quickstart
 
@@ -15,7 +15,7 @@ make
 make run
 ```
 
-The UI will fetch everything live from the API. No local state, no mercy.
+The UI fetches everything live from the API. Nothing is saved locally.
 
 ## Installation
 
