@@ -17,6 +17,14 @@ make run
 
 The UI fetches everything live from the API. Nothing is saved locally.
 
+## Screenshots
+
+![Main menu](screenshots/1.png)
+![Room selection](screenshots/2.png)
+![Kiosk inventory](screenshots/3.png)
+![Order result](screenshots/5.png)
+![Order result Fail](screenshots/4.png)
+
 ## Installation
 
 ### Installing GnuCOBOL, curl, jq
