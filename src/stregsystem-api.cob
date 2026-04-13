@@ -54,12 +54,13 @@
        01 line-pos            PIC 9(5) COMP-5.
        01 product-line        PIC X(256).
        01 WS-IDX              PIC 99 COMP-5.
+       01 response-bytes      PIC 9(6) COMP-5.
 
-      * logging control
-       01 logging-control.
-           05 api-init-done    PIC 9 VALUE 0.
-           05 api-log-level    PIC 9 VALUE 0.
-           05 api-env-val      PIC X(10).
+      * centralized logging
+       COPY "copybooks/logging.cpy".
+
+      * one-time init guard for API setup
+       01 api-init-done       PIC 9 VALUE 0.
 
       * API configuration
        01 api-url              PIC X(200).
@@ -86,10 +87,19 @@
                MOVE 0 TO sale-price(WS-IDX)
            END-PERFORM
            IF api-init-done = 0
-               PERFORM INIT-LOGGING
+               MOVE "STREGSYSTEM-API" TO log-component
+               PERFORM LOG-INIT
                PERFORM INIT-API-CONFIG
                PERFORM INIT-TEMP-DIR
+               MOVE 1 TO api-init-done
            END-IF
+
+           MOVE SPACES TO log-message
+           STRING "API operation: " DELIMITED BY SIZE
+               FUNCTION TRIM(api-operation) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
 
            EVALUATE api-operation
@@ -108,7 +118,12 @@
                WHEN "TEST"
                    PERFORM API-xGET-TEST
                WHEN OTHER
-                   DISPLAY "Unknown API operation: " api-operation
+                   MOVE SPACES TO log-message
+                   STRING "Unknown API operation: " DELIMITED BY SIZE
+                        FUNCTION TRIM(api-operation) DELIMITED BY SIZE
+                        INTO log-message
+                   END-STRING
+                   PERFORM LOG-ERROR
                    MOVE 1 TO api-response-status
            END-EVALUATE
 
@@ -134,10 +149,12 @@
       *   }
       * }
        API-xGET-ACTIVE-PRODUCTS.
-          IF api-log-level >= 2
-              DISPLAY "Request path: " FUNCTION TRIM(req-path)
-              DISPLAY "Request body: " FUNCTION TRIM(req-body)
-          END-IF
+           MOVE SPACES TO log-message
+           STRING "GET active products for room_id=" DELIMITED BY SIZE
+               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
            STRING
@@ -147,15 +164,26 @@
            END-STRING
            MOVE SPACES TO req-body
 
-           IF api-log-level >= 2
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+                FUNCTION TRIM(req-path) DELIMITED BY SIZE
+                INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            CALL "HTTP-CLIENT" USING
                http-request-data
                http-response-status
            END-CALL
            MOVE http-response-status TO api-response-status
+
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
@@ -166,15 +194,12 @@
                    MOVE "ACTIVE" TO dict-work-source
                    PERFORM LOAD-PRODUCTS-TO-DICTIONARY
                END-IF
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Active products fetched successfully"
-               END-IF
+               MOVE "Active products fetched successfully"
+                    TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Active products fetch failed"
-               END-IF
+               MOVE "Active products fetch failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * GET /api/products/named_products
@@ -185,24 +210,34 @@
       *   "beer": 123
       * }
        API-xGET-NAMED-PRODUCTS.
-           IF api-log-level >= 1
-               DISPLAY "Fetching named products..."
-           END-IF
+           MOVE "Fetching named products" TO log-message
+           PERFORM LOG-INFO
 
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
            MOVE "/api/products/named_products" TO req-path
            MOVE SPACES TO req-body
 
-           IF api-log-level >= 2
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-path) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            CALL "HTTP-CLIENT" USING
                http-request-data
                http-response-status
            END-CALL
            MOVE http-response-status TO api-response-status
+
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
@@ -213,15 +248,11 @@
                    MOVE "NAMED" TO dict-work-source
                    PERFORM LOAD-PRODUCTS-TO-DICTIONARY
                END-IF
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Named products fetched successfully"
-               END-IF
+               MOVE "Named products fetched successfully" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Named products fetch failed"
-               END-IF
+               MOVE "Named products fetch failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * GET /api/member/get_id?username={username}
@@ -231,10 +262,12 @@
       *   "member_id": 321,
       * }
        API-xGET-MEMBER-ID.
-           IF api-log-level >= 1
-               DISPLAY "Fetching member id for username "
-               api-username "..."
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Fetching member id for username " DELIMITED BY SIZE
+                FUNCTION TRIM(api-username) DELIMITED BY SIZE
+                INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
@@ -244,9 +277,12 @@
            END-STRING
            MOVE SPACES TO req-body
 
-           IF api-log-level >= 2
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-path) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            CALL "HTTP-CLIENT" USING
                http-request-data
@@ -254,19 +290,23 @@
            END-CALL
            MOVE http-response-status TO api-response-status
 
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
                MOVE "GET_MEMBER_ID" TO parse-operation
                PERFORM PARSE-JSON-RESPONSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member id fetched successfully"
-               END-IF
+               MOVE "Member id fetched successfully" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member id fetch failed"
-               END-IF
+               MOVE "Member id fetch failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * GET /api/member?member_id={member_id}
@@ -279,10 +319,12 @@
       *   "name": "Kresten Laust"
       * }
        API-xGET-MEMBER.
-           IF api-log-level >= 1
-               DISPLAY "Fetching member info for id "
-                       api-member-id "..."
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Fetching member info for id " DELIMITED BY SIZE
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
@@ -292,15 +334,26 @@
            END-STRING
            MOVE SPACES TO req-body
 
-           IF api-log-level >= 2
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-path) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            CALL "HTTP-CLIENT" USING
                http-request-data
                http-response-status
            END-CALL
            MOVE http-response-status TO api-response-status
+
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
@@ -314,15 +367,11 @@
                             member-name
                    END-UNSTRING
                END-IF
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member info fetched successfully"
-               END-IF
+               MOVE "Member info fetched successfully" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member info fetch failed"
-               END-IF
+               MOVE "Member info fetch failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * GET /api/member/sales?member_id={member_id}
@@ -338,10 +387,12 @@
       *   ]
       * }
        API-xGET-MEMBER-SALES.
-           IF api-log-level >= 1
-               DISPLAY "Fetching sales for member id "
-                       api-member-id "..."
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Fetching sales for member id " DELIMITED BY SIZE
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
@@ -351,15 +402,26 @@
            END-STRING
            MOVE SPACES TO req-body
 
-           IF api-log-level >= 2
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-path) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            CALL "HTTP-CLIENT" USING
                http-request-data
                http-response-status
            END-CALL
            MOVE http-response-status TO api-response-status
+
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
@@ -368,15 +430,11 @@
                IF parse-status = 0
                    PERFORM PARSE-MEMBER-SALES-LIST
                END-IF
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member sales fetched successfully"
-               END-IF
+               MOVE "Member sales fetched successfully" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Member sales fetch failed"
-               END-IF
+               MOVE "Member sales fetch failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * POST /api/sale
@@ -418,9 +476,12 @@
       *   }
       * }
        API-xPOST-SALE.
-           IF api-log-level >= 1
-               DISPLAY "Creating sale for room " api-room-id "..."
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Creating sale for room " DELIMITED BY SIZE
+               FUNCTION TRIM(api-room-id) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
       *    Build sale endpoint path: /api/sale
            MOVE "/api/sale" TO req-path
@@ -451,18 +512,40 @@
                INTO req-body
            END-STRING
 
-           IF api-log-level >= 2
-               DISPLAY "POST_SALE member id: "
-                   FUNCTION TRIM(api-member-id)
-               DISPLAY "Request path: " FUNCTION TRIM(req-path)
-               DISPLAY "Request body: " FUNCTION TRIM(req-body)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "POST_SALE member id: " DELIMITED BY SIZE
+               FUNCTION TRIM(api-member-id) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+
+           MOVE SPACES TO log-message
+           STRING "Request path: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-path) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+
+           MOVE SPACES TO log-message
+           STRING "Request body: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-body) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
 
            CALL "HTTP-CLIENT" USING
                http-request-data
                http-response-status
            END-CALL
            MOVE http-response-status TO api-response-status
+
+           MOVE SPACES TO log-message
+           MOVE http-response-status TO log-num-text
+           STRING "HTTP status: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            IF http-response-status = 0
                PERFORM READ-HTTP-RESPONSE
@@ -476,21 +559,23 @@
                             sale-member-balance
                    END-UNSTRING
                END-IF
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Sale created successfully"
-               END-IF
+               MOVE "Sale created successfully" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Sale creation failed"
-               END-IF
+               MOVE "Sale creation failed" TO log-message
+               PERFORM LOG-WARN
+               MOVE http-response-status TO sale-status
+               MOVE http-response-status TO log-num-text
+               STRING "HTTP request failed (status " DELIMITED BY SIZE
+                   log-num-text DELIMITED BY SIZE
+                   ")" DELIMITED BY SIZE
+                   INTO sale-message
+               END-STRING
            END-IF.
 
        API-xGET-TEST.
-           IF api-log-level >= 1
-               DISPLAY "Calling test endpoint..."
-           END-IF
+           MOVE "Calling test endpoint" TO log-message
+           PERFORM LOG-INFO
            MOVE "GET" TO req-method
            MOVE api-url TO req-url
            MOVE "/test" TO req-path
@@ -503,15 +588,11 @@
            MOVE http-response-status TO api-response-status
 
            IF http-response-status = 0
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Test endpoint call successful"
-               END-IF
+               MOVE "Test endpoint call successful" TO log-message
+               PERFORM LOG-INFO
            ELSE
-               IF api-log-level >= 1
-                   DISPLAY " "
-                   DISPLAY "Test endpoint call failed"
-               END-IF
+               MOVE "Test endpoint call failed" TO log-message
+               PERFORM LOG-WARN
            END-IF.
 
       * READ-HTTP-RESPONSE - Load curl output into json-input
@@ -543,11 +624,35 @@
                END-READ
            END-PERFORM
 
-           CLOSE HTTP-RESPONSE-FILE.
+           CLOSE HTTP-RESPONSE-FILE
+
+           COMPUTE response-bytes = response-pos - 1
+           MOVE SPACES TO log-message
+           MOVE response-bytes TO log-num-text
+           STRING "HTTP response bytes: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
       * PARSE-JSON-RESPONSE - Run JSON-DECODER and store output
        PARSE-JSON-RESPONSE.
            MOVE SPACES TO parsed-output
+           MOVE SPACES TO log-message
+           STRING "Parsing JSON operation: " DELIMITED BY SIZE
+               FUNCTION TRIM(parse-operation) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+
+           IF FUNCTION TRIM(json-input) = SPACES
+               MOVE 4 TO parse-status
+               MOVE "Empty HTTP response body" TO log-message
+               PERFORM LOG-WARN
+               MOVE parse-status TO api-response-status
+               EXIT PARAGRAPH
+           END-IF
            CALL "JSON-DECODER" USING
                json-input
                parse-operation
@@ -557,7 +662,16 @@
 
            IF parse-status = 0
                MOVE parsed-output TO api-response-body
+               MOVE "JSON parse OK" TO log-message
+               PERFORM LOG-DEBUG
            ELSE
+               MOVE SPACES TO log-message
+               MOVE parse-status TO log-num-text
+               STRING "JSON parse failed: " DELIMITED BY SIZE
+                   log-num-text DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-WARN
                MOVE parse-status TO api-response-status
            END-IF.
 
@@ -584,7 +698,16 @@
                        END-UNSTRING
                    END-IF
                END-IF
-           END-PERFORM.
+           END-PERFORM
+
+           MOVE SPACES TO log-message
+           MOVE products-count TO log-num-text
+           STRING "Parsed active products: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
       * PARSE-NAMED-PRODUCTS-LIST - Parse tab-delimited lines
        PARSE-NAMED-PRODUCTS-LIST.
@@ -609,7 +732,16 @@
                        MOVE 0 TO prod-price(products-count)
                    END-IF
                END-IF
-           END-PERFORM.
+           END-PERFORM
+
+           MOVE SPACES TO log-message
+           MOVE products-count TO log-num-text
+           STRING "Parsed named products: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
       * PARSE-MEMBER-SALES-LIST - Parse tab-delimited lines
        PARSE-MEMBER-SALES-LIST.
@@ -634,30 +766,22 @@
                        END-UNSTRING
                    END-IF
                END-IF
-           END-PERFORM.
+           END-PERFORM
+
+           MOVE SPACES TO log-message
+           MOVE member-sales-count TO log-num-text
+           STRING "Parsed member sales: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
       * Product dictionary helper procedures
        COPY "copybooks/product-dict-procedures.cob".
 
-       INIT-LOGGING.
-      *    Read environment variable COB_HTTP_CLIENT_LOG;
-      *    interpret 0=none,1=minimal,2=verbose
-           ACCEPT api-env-val FROM ENVIRONMENT "COB_HTTP_CLIENT_LOG"
-           MOVE FUNCTION TRIM(api-env-val) TO api-env-val
-           MOVE FUNCTION UPPER-CASE(api-env-val) TO api-env-val
-           IF api-env-val = "2"
-               MOVE 2 TO api-log-level
-           ELSE IF api-env-val = "TRUE"
-               MOVE 2 TO api-log-level
-           ELSE IF api-env-val = "1"
-               MOVE 1 TO api-log-level
-           ELSE IF api-env-val = "MINIMAL"
-               MOVE 1 TO api-log-level
-           ELSE
-               MOVE 0 TO api-log-level
-           END-IF
-           MOVE 1 TO api-init-done
-           . *> end of function
+      * Logging procedures
+       COPY "copybooks/logging-procedures.cob".
 
        INIT-TEMP-DIR.
            MOVE SPACES TO WS-TEMP-DIR-ENV
@@ -690,11 +814,27 @@
                FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
                "/http-response.txt" DELIMITED BY SIZE
                INTO WS-HTTP-RESPONSE-PATH
-           END-STRING.
+           END-STRING
+
+           MOVE SPACES TO log-message
+           STRING "HTTP response path: " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-HTTP-RESPONSE-PATH) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
        INIT-API-CONFIG.
       *    Read environment variable for API configuration
            ACCEPT api-url FROM ENVIRONMENT "STREGSYSTEM_URL"
            IF api-url = SPACES
                MOVE "https://stregsystem.fklub.dk" TO api-url
-           END-IF.
+           END-IF
+
+           MOVE SPACES TO log-message
+           STRING "API base URL: " DELIMITED BY SIZE
+               FUNCTION TRIM(api-url) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
+           .

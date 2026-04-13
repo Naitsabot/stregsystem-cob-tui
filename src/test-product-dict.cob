@@ -22,7 +22,7 @@
        COPY "copybooks/parsed-products.cpy".
 
       * Required working variables
-       01 api-log-level        PIC 9 VALUE 0.
+       COPY "copybooks/logging.cpy".
        01 WS-IDX               PIC 99 COMP-5.
 
        PROCEDURE DIVISION.
@@ -30,7 +30,13 @@
       * Product dictionary helper procedures
        COPY "copybooks/product-dict-procedures.cob".
 
+      * Logging procedures
+       COPY "copybooks/logging-procedures.cob".
+
        MAIN-PROCEDURE.
+           MOVE "TEST-PRODUCT-DICT" TO log-component
+           PERFORM LOG-INIT
+
            DISPLAY "=== Testing Product Dictionary ==="
            DISPLAY " "
 

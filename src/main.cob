@@ -40,6 +40,8 @@
       *             Added buy logic when buying.
       *      1.1.0: Added install and uninstall method. played with env.
       *      1.1.1: Fix formatting a bit
+      *      1.2.0: Add a ton of logging. Fix some TUI formatting.
+      *             Remove redundant code
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MAIN.
@@ -50,49 +52,8 @@
            FUNCTION ALL INTRINSIC.
 
        DATA DIVISION.
-       WORKING-STORAGE SECTION.
-       01 user-name            PIC A(30).
-       01 item                 PIC A(30).
-       01 user-choice          PIC 9.
-       01 test-thing           PIC X(4) VALUE "8000".
-
-       SCREEN SECTION.
-       01 SIMPLE-SCREEN.
-           05 BLANK SCREEN.
-           05 LINE 2 COLUMN 5 VALUE "Screen section example".
-           05 LINE 4 COLUMN 5 VALUE "Press Enter to continue.".
-
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
            CALL "TUI".
 
-      *    DISPLAY " "
-      *    DISPLAY "1. Manual input test"
-      *    DISPLAY "2. Run SCREEN SECTION test"
-      *    DISPLAY "Choose option: " WITH NO ADVANCING
-      *    ACCEPT user-choice
-      *
-      *    EVALUATE user-choice
-      *        WHEN 1
-      *            PERFORM MANUAL-INPUT-TEST
-      *        WHEN 2
-      *            PERFORM SCREEN-EXAMPLE
-      *        WHEN OTHER
-      *            DISPLAY "Invalid choice"
-      *    END-EVALUATE
-
            STOP RUN.
-
-       SCREEN-EXAMPLE.
-           DISPLAY simple-screen
-           ACCEPT simple-screen.
-
-       MANUAL-INPUT-TEST.
-           DISPLAY "What is your username?"
-           ACCEPT user-name
-           DISPLAY "Nice to meet you, "
-                   FUNCTION TRIM(user-name) "!"
-           DISPLAY "What item do you want to buy?"
-           ACCEPT item
-           DISPLAY FUNCTION TRIM(user-name) " wants to buy: "
-                   FUNCTION TRIM(item).

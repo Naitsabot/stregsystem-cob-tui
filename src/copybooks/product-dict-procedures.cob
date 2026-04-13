@@ -2,7 +2,7 @@
       * Purpose: Reusable procedures for product dictionary operations
       * Usage: COPY this into PROCEDURE DIVISION after including
       *        product-dictionary.cpy in WORKING-STORAGE
-      * Requires: api-log-level (PIC 9), WS-IDX (PIC 99 COMP-5)
+      * Requires: log-level (PIC 9), WS-IDX (PIC 99 COMP-5)
 
       ******************************************************************
       * ADD-TO-DICTIONARY
@@ -18,26 +18,33 @@
       *    Check if product already exists
            PERFORM SEARCH-DICTIONARY
            IF dict-found
-               IF api-log-level > 0
-                   DISPLAY "Product " dict-search-id
-                          " already in dictionary, updating..."
-               END-IF
+               MOVE SPACES TO log-message
+               STRING "Product " DELIMITED BY SIZE
+                   FUNCTION TRIM(dict-search-id) DELIMITED BY SIZE
+                   " already in dictionary, updating" DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-INFO
                MOVE dict-work-name TO dict-prod-name(dict-idx)
                MOVE dict-work-price TO dict-prod-price(dict-idx)
                MOVE dict-work-active TO dict-is-active(dict-idx)
                MOVE dict-work-source TO dict-source(dict-idx)
                SET dict-duplicate TO TRUE
-               IF api-log-level > 1
-                   DISPLAY "Updated product " dict-prod-id(dict-idx)
-                          " in dictionary"
-               END-IF
+               MOVE SPACES TO log-message
+               STRING "Updated product " DELIMITED BY SIZE
+                   FUNCTION TRIM(dict-prod-id(dict-idx))
+                   DELIMITED BY SIZE
+                   " in dictionary" DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-DEBUG
            ELSE
       *        Check if dictionary is full
                IF dict-entry-count >= dict-max-entries
                    SET dict-full TO TRUE
-                   IF api-log-level > 0
-                       DISPLAY "Product dictionary is full (max 35)"
-                   END-IF
+                   MOVE "Product dictionary is full (max 35)"
+                       TO log-message
+                   PERFORM LOG-WARN
                ELSE
       *            Add new entry
                    ADD 1 TO dict-entry-count
@@ -48,11 +55,17 @@
                    MOVE dict-work-active TO dict-is-active(dict-idx)
                    MOVE dict-work-source TO dict-source(dict-idx)
                    SET dict-inserted TO TRUE
-                   IF api-log-level > 1
-                       DISPLAY "Added product " dict-prod-id(dict-idx)
-                              " to dictionary (entry "
-                              dict-entry-count ")"
-                   END-IF
+                   MOVE SPACES TO log-message
+                   MOVE dict-entry-count TO log-num-text
+                   STRING "Added product " DELIMITED BY SIZE
+                       FUNCTION TRIM(dict-prod-id(dict-idx))
+                       DELIMITED BY SIZE
+                       " to dictionary (entry " DELIMITED BY SIZE
+                       log-num-text DELIMITED BY SIZE
+                       ")" DELIMITED BY SIZE
+                       INTO log-message
+                   END-STRING
+                   PERFORM LOG-DEBUG
                END-IF
            END-IF
            .
@@ -72,10 +85,15 @@
                    SET dict-not-found TO TRUE
                WHEN dict-prod-id(dict-idx) = dict-search-id
                    SET dict-found TO TRUE
-                   IF api-log-level > 1
-                       DISPLAY "Found product " dict-search-id
-                              " at index " dict-idx
-                   END-IF
+                   MOVE SPACES TO log-message
+                   MOVE dict-idx TO log-num-text
+                   STRING "Found product " DELIMITED BY SIZE
+                       FUNCTION TRIM(dict-search-id) DELIMITED BY SIZE
+                       " at index " DELIMITED BY SIZE
+                       log-num-text DELIMITED BY SIZE
+                       INTO log-message
+                   END-STRING
+                   PERFORM LOG-DEBUG
            END-SEARCH
            .
 
@@ -89,10 +107,14 @@
       *    Entry already exists at dict-idx, just update it
       *    Product ID stays the same, update other fields as needed
 
-           IF api-log-level > 1
-               DISPLAY "Updated product " dict-prod-id(dict-idx)
-                      " in dictionary"
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Updated product " DELIMITED BY SIZE
+               FUNCTION TRIM(dict-prod-id(dict-idx))
+               DELIMITED BY SIZE
+               " in dictionary" DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
            .
 
       ******************************************************************
@@ -112,9 +134,8 @@
                MOVE SPACES TO dict-source(dict-idx)
            END-PERFORM
 
-           IF api-log-level > 0
-               DISPLAY "Product dictionary cleared"
-           END-IF
+           MOVE "Product dictionary cleared" TO log-message
+           PERFORM LOG-INFO
            .
 
       ******************************************************************
@@ -125,10 +146,14 @@
       * Note: Requires WS-IDX variable: PIC 99 COMP-5
       ******************************************************************
        LOAD-PRODUCTS-TO-DICTIONARY.
-           IF api-log-level > 0
-               DISPLAY "Loading " products-count
-                      " products into dictionary..."
-           END-IF
+           MOVE SPACES TO log-message
+           MOVE products-count TO log-num-text
+           STRING "Loading " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               " products into dictionary" DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
            PERFORM VARYING WS-IDX FROM 1 BY 1
                    UNTIL WS-IDX > products-count
@@ -141,10 +166,14 @@
                PERFORM ADD-TO-DICTIONARY
            END-PERFORM
 
-           IF api-log-level > 0
-               DISPLAY "Dictionary now contains "
-                      dict-entry-count " products"
-           END-IF
+           MOVE SPACES TO log-message
+           MOVE dict-entry-count TO log-num-text
+           STRING "Dictionary now contains " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               " products" DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
            .
 
       ******************************************************************

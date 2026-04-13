@@ -71,18 +71,20 @@
        01 inventory-work.
            05 INV-HEADER       PIC X(64).
            05 INV-LINES.
-               10 INV-LINE     OCCURS 32 TIMES PIC X(36).
+               10 INV-LINE     OCCURS 32 TIMES PIC X(40).
            05 INV-COUNT        PIC 9(3) COMP-5.
            05 INV-ID           PIC X(10).
            05 INV-NAME         PIC X(50).
            05 INV-PRICE        PIC X(20).
-           05 INV-ID-DISP      PIC X(6).
-           05 INV-PRICE-DISP   PIC X(8).
-           05 INV-NAME-DISP    PIC X(18).
+           05 INV-ID-DISP      PIC X(4).
+           05 INV-PRICE-DISP   PIC X(5).
+           05 INV-NAME-DISP    PIC X(20).
            05 INV-LINE-RAW     PIC X(256).
            05 INV-POS          PIC 9(5) COMP-5.
            05 INV-IDX          PIC 99 COMP-5.
 
+      * centralized logging
+       COPY "copybooks/logging.cpy".
        COPY "copybooks/api-request.cpy".
        COPY "copybooks/api-response.cpy".
       *COPY "copybooks/screenio.cpy".
@@ -140,56 +142,58 @@
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
            05 LINE 21 COLUMN 4 PIC X(64) FROM INV-HEADER.
-           05 LINE 22 COLUMN 4 VALUE "ID    PRICE    NAME".
-           05 LINE 22 COLUMN 42 VALUE "ID    PRICE    NAME".
+           05 LINE 23 COLUMN 4
+               VALUE "| ID-- : PRICE : NAME---------------- |".
+           05 LINE 23 COLUMN 43
+               VALUE "| ID-- : PRICE : NAME---------------- |".
 
-           05 LINE 24 COLUMN 4 PIC X(36) FROM INV-LINE(1).
-           05 LINE 24 COLUMN 42 PIC X(36) FROM INV-LINE(17).
+           05 LINE 24 COLUMN 4 PIC X(40) FROM INV-LINE(1).
+           05 LINE 24 COLUMN 43 PIC X(40) FROM INV-LINE(17).
 
-           05 LINE 25 COLUMN 4 PIC X(36) FROM INV-LINE(2).
-           05 LINE 25 COLUMN 42 PIC X(36) FROM INV-LINE(18).
+           05 LINE 25 COLUMN 4 PIC X(40) FROM INV-LINE(2).
+           05 LINE 25 COLUMN 43 PIC X(40) FROM INV-LINE(18).
 
-           05 LINE 26 COLUMN 4 PIC X(36) FROM INV-LINE(3).
-           05 LINE 26 COLUMN 42 PIC X(36) FROM INV-LINE(19).
+           05 LINE 26 COLUMN 4 PIC X(40) FROM INV-LINE(3).
+           05 LINE 26 COLUMN 43 PIC X(40) FROM INV-LINE(19).
 
-           05 LINE 27 COLUMN 4 PIC X(36) FROM INV-LINE(4).
-           05 LINE 27 COLUMN 42 PIC X(36) FROM INV-LINE(20).
+           05 LINE 27 COLUMN 4 PIC X(40) FROM INV-LINE(4).
+           05 LINE 27 COLUMN 43 PIC X(40) FROM INV-LINE(20).
 
-           05 LINE 28 COLUMN 4 PIC X(36) FROM INV-LINE(5).
-           05 LINE 28 COLUMN 42 PIC X(36) FROM INV-LINE(21).
+           05 LINE 28 COLUMN 4 PIC X(40) FROM INV-LINE(5).
+           05 LINE 28 COLUMN 43 PIC X(40) FROM INV-LINE(21).
 
-           05 LINE 29 COLUMN 4 PIC X(36) FROM INV-LINE(6).
-           05 LINE 29 COLUMN 42 PIC X(36) FROM INV-LINE(22).
+           05 LINE 29 COLUMN 4 PIC X(40) FROM INV-LINE(6).
+           05 LINE 29 COLUMN 43 PIC X(40) FROM INV-LINE(22).
 
-           05 LINE 30 COLUMN 4 PIC X(36) FROM INV-LINE(7).
-           05 LINE 30 COLUMN 42 PIC X(36) FROM INV-LINE(23).
+           05 LINE 30 COLUMN 4 PIC X(40) FROM INV-LINE(7).
+           05 LINE 30 COLUMN 43 PIC X(40) FROM INV-LINE(23).
 
-           05 LINE 31 COLUMN 4 PIC X(36) FROM INV-LINE(8).
-           05 LINE 31 COLUMN 42 PIC X(36) FROM INV-LINE(24).
+           05 LINE 31 COLUMN 4 PIC X(40) FROM INV-LINE(8).
+           05 LINE 31 COLUMN 43 PIC X(40) FROM INV-LINE(24).
 
-           05 LINE 32 COLUMN 4 PIC X(36) FROM INV-LINE(9).
-           05 LINE 32 COLUMN 42 PIC X(36) FROM INV-LINE(25).
+           05 LINE 32 COLUMN 4 PIC X(40) FROM INV-LINE(9).
+           05 LINE 32 COLUMN 43 PIC X(40) FROM INV-LINE(25).
 
-           05 LINE 33 COLUMN 4 PIC X(36) FROM INV-LINE(10).
-           05 LINE 33 COLUMN 42 PIC X(36) FROM INV-LINE(26).
+           05 LINE 33 COLUMN 4 PIC X(40) FROM INV-LINE(10).
+           05 LINE 33 COLUMN 43 PIC X(40) FROM INV-LINE(26).
 
-           05 LINE 34 COLUMN 4 PIC X(36) FROM INV-LINE(11).
-           05 LINE 34 COLUMN 42 PIC X(36) FROM INV-LINE(27).
+           05 LINE 34 COLUMN 4 PIC X(40) FROM INV-LINE(11).
+           05 LINE 34 COLUMN 43 PIC X(40) FROM INV-LINE(27).
 
-           05 LINE 35 COLUMN 4 PIC X(36) FROM INV-LINE(12).
-           05 LINE 35 COLUMN 42 PIC X(36) FROM INV-LINE(28).
+           05 LINE 35 COLUMN 4 PIC X(40) FROM INV-LINE(12).
+           05 LINE 35 COLUMN 43 PIC X(40) FROM INV-LINE(28).
 
-           05 LINE 36 COLUMN 4 PIC X(36) FROM INV-LINE(13).
-           05 LINE 36 COLUMN 42 PIC X(36) FROM INV-LINE(29).
+           05 LINE 36 COLUMN 4 PIC X(40) FROM INV-LINE(13).
+           05 LINE 36 COLUMN 43 PIC X(40) FROM INV-LINE(29).
 
-           05 LINE 37 COLUMN 4 PIC X(36) FROM INV-LINE(14).
-           05 LINE 37 COLUMN 42 PIC X(36) FROM INV-LINE(30).
+           05 LINE 37 COLUMN 4 PIC X(40) FROM INV-LINE(14).
+           05 LINE 37 COLUMN 43 PIC X(40) FROM INV-LINE(30).
 
-           05 LINE 38 COLUMN 4 PIC X(36) FROM INV-LINE(15).
-           05 LINE 38 COLUMN 42 PIC X(36) FROM INV-LINE(31).
+           05 LINE 38 COLUMN 4 PIC X(40) FROM INV-LINE(15).
+           05 LINE 38 COLUMN 43 PIC X(40) FROM INV-LINE(31).
 
-           05 LINE 39 COLUMN 4 PIC X(36) FROM INV-LINE(16).
-           05 LINE 39 COLUMN 42 PIC X(36) FROM INV-LINE(32).
+           05 LINE 39 COLUMN 4 PIC X(40) FROM INV-LINE(16).
+           05 LINE 39 COLUMN 43 PIC X(40) FROM INV-LINE(32).
 
        01 KIOSK-SELECTION-SCREEN-START
            BACKGROUND-COLOR BG-COLOUR
@@ -256,6 +260,12 @@
            05 LINE 18 COLUMN 4 VALUE "Press ENTER to continue.".
 
        PROCEDURE DIVISION.
+           MOVE "TUI" TO log-component
+           PERFORM LOG-INIT
+
+           MOVE "TUI startup" TO log-message
+           PERFORM LOG-INFO
+
            PERFORM INIT-CONFIG
            PERFORM LOAD-CONFIG
            PERFORM INIT-DEFAULTS
@@ -266,14 +276,29 @@
 
            PERFORM SAVE-CONFIG.
 
-           GOBACK.
+           MOVE "TUI exit" TO log-message
+           PERFORM LOG-INFO
 
+           GOBACK.
 
        MAIN-SELECTION.
            MOVE 0 TO DONE
            PERFORM UNTIL DONE = 1
                DISPLAY MAIN-SELECTION-SCREEN
                ACCEPT MAIN-SELECTION-SCREEN
+
+               MOVE SPACES TO log-message
+                   MOVE 1 TO log-pos
+                   STRING "Menu choice: " DELIMITED BY SIZE
+                       FUNCTION TRIM(SCREEN-MENU-CHOICE)
+                           DELIMITED BY SIZE
+                       INTO log-message WITH POINTER log-pos
+                   END-STRING
+                   STRING ", room=" DELIMITED BY SIZE
+                       FUNCTION TRIM(SCREEN-ROOM-ID) DELIMITED BY SIZE
+                       INTO log-message WITH POINTER log-pos
+                   END-STRING
+               PERFORM LOG-DEBUG
 
                PERFORM HANDLE-KEY-COLOR
            END-PERFORM
@@ -288,6 +313,14 @@
                DISPLAY ROOM-SELECTION-SCREEN
                ACCEPT ROOM-SELECTION-SCREEN
 
+               MOVE SPACES TO log-message
+                   MOVE 1 TO log-pos
+                   STRING "Room selection input: " DELIMITED BY SIZE
+                       FUNCTION TRIM(SCREEN-ROOM-ID) DELIMITED BY SIZE
+                       INTO log-message WITH POINTER log-pos
+                   END-STRING
+               PERFORM LOG-DEBUG
+
                PERFORM HANDLE-KEY-COLOR
            END-PERFORM.
            PERFORM SAVE-CONFIG.
@@ -300,6 +333,22 @@
                DISPLAY KIOSK-SELECTION-SCREEN-INVENTORY
                DISPLAY KIOSK-SELECTION-SCREEN-SELECT
                ACCEPT KIOSK-SELECTION-SCREEN-SELECT
+               MOVE SPACES TO log-message
+               MOVE 1 TO log-pos
+               STRING "Kiosk input: user=" DELIMITED BY SIZE
+                   FUNCTION TRIM(SCREEN-USERNAME) DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               STRING ", order=" DELIMITED BY SIZE
+                   FUNCTION TRIM(SCREEN-PRODUCT-ORDER)
+                   DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               STRING ", room=" DELIMITED BY SIZE
+                   FUNCTION TRIM(SCREEN-ROOM-ID) DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               PERFORM LOG-DEBUG
                IF CRT-STATUS = 0 AND
                    FUNCTION TRIM(SCREEN-PRODUCT-ORDER) NOT = SPACES
                    PERFORM BUY-ORDER
@@ -314,9 +363,27 @@
            MOVE SPACES TO RESULT-LINE2
            MOVE SPACES TO RESULT-LINE3
 
+           MOVE SPACES TO log-message
+           MOVE 1 TO log-pos
+           STRING "Buy order: user=" DELIMITED BY SIZE
+               FUNCTION TRIM(SCREEN-USERNAME) DELIMITED BY SIZE
+               INTO log-message WITH POINTER log-pos
+           END-STRING
+           STRING ", order=" DELIMITED BY SIZE
+               FUNCTION TRIM(SCREEN-PRODUCT-ORDER) DELIMITED BY SIZE
+               INTO log-message WITH POINTER log-pos
+           END-STRING
+           STRING ", room=" DELIMITED BY SIZE
+               FUNCTION TRIM(SCREEN-ROOM-ID) DELIMITED BY SIZE
+               INTO log-message WITH POINTER log-pos
+           END-STRING
+           PERFORM LOG-INFO
+
            IF FUNCTION TRIM(SCREEN-USERNAME) = SPACES
                MOVE "Order failed" TO RESULT-TITLE
                MOVE "Please enter a username first." TO RESULT-LINE1
+               MOVE "Order failed: missing username" TO log-message
+               PERFORM LOG-WARN
                PERFORM SHOW-ORDER-RESULT
                EXIT PARAGRAPH
            END-IF
@@ -331,6 +398,17 @@
            END-CALL
 
            IF api-response-status NOT = 0
+               MOVE api-response-status TO log-num-text
+               MOVE SPACES TO log-message
+               MOVE 1 TO log-pos
+               STRING "Member id lookup failed: " DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               STRING "status " DELIMITED BY SIZE
+                   log-num-text DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               PERFORM LOG-WARN
                MOVE "Order failed" TO RESULT-TITLE
                MOVE "Could not resolve member id." TO RESULT-LINE1
                PERFORM SHOW-ORDER-RESULT
@@ -346,6 +424,8 @@
 
            IF FUNCTION TRIM(member-id) = SPACES OR
                FUNCTION LOWER-CASE(FUNCTION TRIM(member-id)) = "null"
+               MOVE "Order failed: member id empty" TO log-message
+               PERFORM LOG-WARN
                MOVE "Order failed" TO RESULT-TITLE
                MOVE "Could not resolve member id." TO RESULT-LINE1
                PERFORM SHOW-ORDER-RESULT
@@ -364,11 +444,27 @@
            END-CALL
 
            IF api-response-status = 0 AND sale-status = 200
+               MOVE "Order success" TO log-message
+               PERFORM LOG-INFO
                MOVE "Your order was successful!" TO RESULT-TITLE
                MOVE "Thanks for using the" TO RESULT-LINE1
                MOVE "COBOL stregsystem TUI" TO RESULT-LINE2
                MOVE FUNCTION TRIM(sale-message) TO RESULT-LINE3
            ELSE
+               MOVE api-response-status TO log-num-text
+               MOVE sale-status TO log-num-text(17:16)
+               MOVE SPACES TO log-message
+               MOVE 1 TO log-pos
+               STRING "Order failed: api status " DELIMITED BY SIZE
+                   FUNCTION TRIM(log-num-text) DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               STRING ", sale status=" DELIMITED BY SIZE
+                   FUNCTION TRIM(log-num-text(17:16))
+                   DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               PERFORM LOG-WARN
                MOVE "Order failed" TO RESULT-TITLE
                MOVE "Reason:" TO RESULT-LINE1
                MOVE FUNCTION TRIM(sale-message) TO RESULT-LINE2
@@ -397,8 +493,21 @@
            END-CALL
 
            IF api-response-status NOT = 0
+               MOVE api-response-status TO log-num-text
+               MOVE SPACES TO log-message
+               MOVE 1 TO log-pos
+               STRING "Inventory load failed: " DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               STRING "status " DELIMITED BY SIZE
+                   log-num-text DELIMITED BY SIZE
+                   INTO log-message WITH POINTER log-pos
+               END-STRING
+               PERFORM LOG-WARN
                MOVE "Failed to load products" TO INV-HEADER
            ELSE
+               MOVE "Inventory loaded" TO log-message
+               PERFORM LOG-INFO
                MOVE SPACES TO INV-HEADER
                STRING
                    "Active products (room " DELIMITED BY SIZE
@@ -434,11 +543,13 @@
                                TO INV-PRICE-DISP
                            MOVE FUNCTION TRIM(INV-NAME) TO INV-NAME-DISP
                            STRING
+                               "| " DELIMITED BY SIZE
                                INV-ID-DISP DELIMITED BY SIZE
-                               "  " DELIMITED BY SIZE
+                               " : " DELIMITED BY SIZE
                                INV-PRICE-DISP DELIMITED BY SIZE
-                               "  " DELIMITED BY SIZE
+                               " : " DELIMITED BY SIZE
                                INV-NAME-DISP DELIMITED BY SIZE
+                               " |" DELIMITED BY SIZE
                                INTO INV-LINE(INV-COUNT)
                            END-STRING
                        END-IF
@@ -448,7 +559,7 @@
 
        INIT-DEFAULTS.
            IF SCREEN-ROOM-ID = SPACES
-               MOVE "1" TO SCREEN-ROOM-ID
+               MOVE "10" TO SCREEN-ROOM-ID
            END-IF.
 
        INIT-CONFIG.
@@ -596,3 +707,6 @@
                WHEN OTHER
                    MOVE 1 TO DONE
            END-EVALUATE.
+
+      * Logging procedures
+       COPY "copybooks/logging-procedures.cob".

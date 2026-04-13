@@ -25,10 +25,11 @@
        01 WS-TEMP-DIR          PIC X(256).
        01 WS-TEMP-DIR-ENV      PIC X(256).
        01 WS-TEMP-CMD          PIC X(512).
-       01 http-client-init-flag.
-           05 init-done        PIC 9 VALUE 0.
-           05 log-level        PIC 9 VALUE 0.
-           05 env-val          PIC X(10).
+      * centralized logging
+       COPY "copybooks/logging.cpy".
+
+      * one-time init guard for http client
+       01 http-init-done       PIC 9 VALUE 0.
 
        LINKAGE SECTION.
        COPY "copybooks/http-request.cpy".
@@ -38,10 +39,19 @@
                                 http-response-status.
 
        MAIN-LOGIC.
-           IF init-done = 0
-               PERFORM INIT-LOGGING
+           IF http-init-done = 0
+               MOVE "HTTP-CLIENT" TO log-component
+               PERFORM LOG-INIT
                PERFORM INIT-TEMP-DIR
+               MOVE 1 TO http-init-done
            END-IF
+
+           MOVE SPACES TO log-message
+           STRING "HTTP request method: " DELIMITED BY SIZE
+               FUNCTION TRIM(req-method) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
            EVALUATE req-method
                WHEN "GET"
@@ -49,7 +59,12 @@
                WHEN "POST"
                    PERFORM EXECUTE-POST-REQUEST
                WHEN OTHER
-                   DISPLAY "Unsupported HTTP method: " req-method
+                   MOVE SPACES TO log-message
+                   STRING "Unsupported HTTP method: " DELIMITED BY SIZE
+                       FUNCTION TRIM(req-method) DELIMITED BY SIZE
+                       INTO log-message
+                   END-STRING
+                   PERFORM LOG-ERROR
                    MOVE 1 TO http-response-status
            END-EVALUATE
 
@@ -69,14 +84,18 @@
                INTO system-cmd
            END-STRING
 
-           IF log-level = 2
-               DISPLAY "SYSTEM CMD: " FUNCTION TRIM(system-cmd)
-           END-IF
-           IF log-level < 2
+           MOVE SPACES TO log-message
+           STRING "Curl command: " DELIMITED BY SIZE
+               FUNCTION TRIM(system-cmd) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+
+           IF log-level < 4
       *        Prefix with exec to redirect shell stdout/stderr
       *        for the whole command
                STRING "exec >/dev/null 2>&1; " DELIMITED BY SIZE
-                      system-cmd DELIMITED BY SIZE
+                   system-cmd DELIMITED BY SIZE
                    INTO system-cmd-full
                END-STRING
                MOVE system-cmd-full TO system-cmd
@@ -86,26 +105,13 @@
 
            MOVE system-result TO http-response-status.
 
-       INIT-LOGGING.
-      *    Read environment variable COB_HTTP_CLIENT_LOG;
-      *    interpret 0=none,1=minimal,2=verbose
-           ACCEPT env-val FROM ENVIRONMENT "COB_HTTP_CLIENT_LOG"
-           MOVE FUNCTION TRIM(env-val) TO env-val
-           MOVE FUNCTION UPPER-CASE(env-val) TO env-val
-           IF env-val = "2"
-               MOVE 2 TO log-level
-           ELSE IF env-val = "TRUE"
-               MOVE 2 TO log-level
-           ELSE IF env-val = "VERBOSE"
-               MOVE 2 TO log-level
-           ELSE IF env-val = "1"
-               MOVE 1 TO log-level
-           ELSE IF env-val = "MINIMAL"
-               MOVE 1 TO log-level
-           ELSE
-               MOVE 0 TO log-level
-           END-IF
-           MOVE 1 TO init-done
+           MOVE SPACES TO log-message
+           MOVE system-result TO log-num-text
+           STRING "HTTP system result: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
            .
 
        INIT-TEMP-DIR.
@@ -139,7 +145,15 @@
                FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
                "/http-response.txt" DELIMITED BY SIZE
                INTO response-output-file
-           END-STRING.
+           END-STRING
+
+           MOVE SPACES TO log-message
+           STRING "HTTP response path: " DELIMITED BY SIZE
+               FUNCTION TRIM(response-output-file) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
 
        EXECUTE-POST-REQUEST.
            COMPUTE body-length =
@@ -161,14 +175,18 @@
                INTO system-cmd
            END-STRING
 
-           IF log-level = 2
-               DISPLAY "SYSTEM CMD: " FUNCTION TRIM(system-cmd)
-           END-IF
-           IF log-level < 2
+           MOVE SPACES TO log-message
+           STRING "Curl command: " DELIMITED BY SIZE
+               FUNCTION TRIM(system-cmd) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+
+           IF log-level < 4
       *        Prefix with exec to redirect shell stdout/stderr
       *        for the whole command
                STRING "exec >/dev/null 2>&1; " DELIMITED BY SIZE
-                      system-cmd DELIMITED BY SIZE
+                   system-cmd DELIMITED BY SIZE
                    INTO system-cmd-full
                END-STRING
                MOVE system-cmd-full TO system-cmd
@@ -177,3 +195,15 @@
            END-CALL
 
            MOVE system-result TO http-response-status.
+
+           MOVE SPACES TO log-message
+           MOVE system-result TO log-num-text
+           STRING "HTTP system result: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+           .
+
+      * Logging procedures
+       COPY "copybooks/logging-procedures.cob".

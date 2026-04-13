@@ -36,10 +36,8 @@
        01 jq-filter            PIC X(512).
        01 jq-executable        PIC X(100) VALUE "jq".
        01 jq-result            PIC S9(9) COMP-5.
-       01 temp-output-file     PIC X(100)
-           VALUE "temp-json-output.txt".
-       01 temp-input-file      PIC X(100)
-           VALUE "temp-json-input.txt".
+       01 temp-output-file     PIC X(100) VALUE "temp-json-output.txt".
+       01 temp-input-file      PIC X(100) VALUE "temp-json-input.txt".
        01 temp-json-escaped    PIC X(8192).
 
       * Temp file paths
@@ -59,11 +57,8 @@
        01 input-pos            PIC 9(5) COMP-5.
        01 input-line           PIC X(8192).
 
-      * logging control
-       01 logging-control.
-           05 decoder-init-done PIC 9 VALUE 0.
-           05 decoder-log-level PIC 9 VALUE 0.
-           05 decoder-env-val   PIC X(10).
+      * centralized logging
+       COPY "copybooks/logging.cpy".
 
        LINKAGE SECTION.
       * Input: JSON string to parse
@@ -84,13 +79,21 @@
                                 parse-status.
 
        MAIN-LOGIC.
-           IF decoder-init-done = 0
-               PERFORM INIT-LOGGING
+           IF log-init-done = 0
+               MOVE "JSON-DECODER" TO log-component
+               PERFORM LOG-INIT
                PERFORM INIT-TEMP-DIR
            END-IF
 
            MOVE 0 TO parse-status
            MOVE SPACES TO parsed-output-data
+
+           MOVE SPACES TO log-message
+           STRING "Decode operation: " DELIMITED BY SIZE
+               FUNCTION TRIM(parse-operation) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-INFO
 
            EVALUATE parse-operation
                WHEN "GET_MEMBER_ID"
@@ -110,26 +113,16 @@
                WHEN "GET_VALUE"
                    PERFORM PARSE-GENERIC-VALUE
                WHEN OTHER
-                   DISPLAY "Unknown parse operation: " parse-operation
+                   MOVE SPACES TO log-message
+                   STRING "Unknown parse operation: " DELIMITED BY SIZE
+                       FUNCTION TRIM(parse-operation) DELIMITED BY SIZE
+                       INTO log-message
+                   END-STRING
+                   PERFORM LOG-ERROR
                    MOVE 1 TO parse-status
            END-EVALUATE
 
            GOBACK.
-
-      * INIT-LOGGING - Initialize logging configuration
-       INIT-LOGGING.
-           ACCEPT decoder-env-val FROM ENVIRONMENT "LOG_LEVEL"
-           IF decoder-env-val = SPACE OR LOW-VALUE
-               MOVE 0 TO decoder-log-level
-           ELSE
-               MOVE FUNCTION NUMVAL(decoder-env-val)
-                   TO decoder-log-level
-           END-IF
-           MOVE 1 TO decoder-init-done
-           IF decoder-log-level >= 1
-               DISPLAY "JSON-DECODER initialized with log level "
-                       decoder-log-level
-           END-IF.
 
        INIT-TEMP-DIR.
            MOVE SPACES TO WS-TEMP-DIR-ENV
@@ -172,7 +165,29 @@
            END-STRING
 
            MOVE WS-JSON-INPUT-PATH TO temp-input-file
-           MOVE WS-JSON-OUTPUT-PATH TO temp-output-file.
+           MOVE WS-JSON-OUTPUT-PATH TO temp-output-file
+
+           MOVE SPACES TO log-message
+           STRING "Temp dir: " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-TEMP-DIR) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
+
+           MOVE SPACES TO log-message
+           STRING "JSON input path: " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JSON-INPUT-PATH) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+
+           MOVE SPACES TO log-message
+           STRING "JSON output path: " DELIMITED BY SIZE
+               FUNCTION TRIM(WS-JSON-OUTPUT-PATH) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+           .
 
       * PARSE-MEMBER-ID - Extract member_id from response
       * Example: {"member_id": 321}
@@ -180,10 +195,13 @@
            MOVE ".member_id" TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed member_id: "
-                       FUNCTION TRIM(parsed-output-data)
-               END-IF
+               MOVE SPACES TO log-message
+               STRING "Parsed member_id: " DELIMITED BY SIZE
+                   FUNCTION TRIM(parsed-output-data)
+                       DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-MEMBER-INFO - Extract member info from response
@@ -195,10 +213,12 @@
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed member info: "
-                       FUNCTION TRIM(parsed-output-data)
-               END-IF
+               MOVE SPACES TO log-message
+               STRING "Parsed member info: " DELIMITED BY SIZE
+                   FUNCTION TRIM(parsed-output-data) DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-BALANCE - Extract balance from response
@@ -207,10 +227,12 @@
            MOVE ".balance" TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed balance: "
-                       FUNCTION TRIM(parsed-output-data)
-               END-IF
+               MOVE SPACES TO log-message
+               STRING "Parsed balance: " DELIMITED BY SIZE
+                   FUNCTION TRIM(parsed-output-data) DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-ACTIVE-PRODUCTS - Extract active products
@@ -225,9 +247,8 @@
            END-STRING
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed active products"
-               END-IF
+               MOVE "Parsed active products" TO log-message
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-NAMED-PRODUCTS - Extract named products
@@ -238,9 +259,8 @@
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed named products"
-               END-IF
+               MOVE "Parsed named products" TO log-message
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-MEMBER-SALES - Extract member sales list
@@ -250,9 +270,8 @@
                TO jq-filter
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed member sales"
-               END-IF
+               MOVE "Parsed member sales" TO log-message
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-SALE-RESULT - Extract sale result
@@ -266,9 +285,8 @@
            END-STRING
            PERFORM EXECUTE-JQ
            IF parse-status = 0
-               IF decoder-log-level >= 2
-                   DISPLAY "Parsed sale result"
-               END-IF
+               MOVE "Parsed sale result" TO log-message
+               PERFORM LOG-DEBUG
            END-IF.
 
       * PARSE-GENERIC-VALUE - Extract a simple value
@@ -280,6 +298,23 @@
       * EXECUTE-JQ - Execute jq command with current filter
        EXECUTE-JQ.
            PERFORM WRITE-INPUT-TO-FILE
+
+           MOVE SPACES TO log-message
+           MOVE FUNCTION LENGTH(FUNCTION TRIM(json-input-data))
+               TO log-num-text
+           STRING "JSON input bytes: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+
+           MOVE SPACES TO log-message
+           STRING "JSON input preview: " DELIMITED BY SIZE
+               FUNCTION TRIM(json-input-data(1:200))
+               DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
 
       *    Build jq command with input file
            MOVE SPACES TO jq-command
@@ -294,16 +329,32 @@
                INTO jq-command
            END-STRING
 
-           IF decoder-log-level >= 2
-               DISPLAY "Executing jq filter: " FUNCTION TRIM(jq-filter)
-           END-IF
+           MOVE SPACES TO log-message
+           STRING "Executing jq filter: " DELIMITED BY SIZE
+                FUNCTION TRIM(jq-filter) DELIMITED BY SIZE
+                INTO log-message
+           END-STRING
+           PERFORM LOG-DEBUG
 
       *    Execute jq command
            CALL "SYSTEM" USING jq-command RETURNING jq-result
            END-CALL
 
            IF jq-result NOT = 0
-               DISPLAY "jq command failed with code: " jq-result
+               MOVE SPACES TO log-message
+               MOVE jq-result TO log-num-text
+               STRING "jq command failed with code: " DELIMITED BY SIZE
+                   log-num-text DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-ERROR
+               MOVE SPACES TO log-message
+               STRING "JSON input preview: " DELIMITED BY SIZE
+                   FUNCTION TRIM(json-input-data(1:200))
+                   DELIMITED BY SIZE
+                   INTO log-message
+               END-STRING
+               PERFORM LOG-TRACE
                MOVE 2 TO parse-status
                GOBACK
            END-IF
@@ -386,7 +437,8 @@
            END-PERFORM
 
            IF output-pos = 1
-               DISPLAY "jq produced no output"
+               MOVE "jq produced no output" TO log-message
+               PERFORM LOG-WARN
                MOVE 3 TO parse-status
                CLOSE JSON-OUTPUT
                GOBACK
@@ -396,11 +448,24 @@
            SUBTRACT 1 FROM output-pos
            MOVE SPACE TO parsed-output-data(output-pos:1)
 
-           IF decoder-log-level >= 3
-               DISPLAY "Read output: "
-                   FUNCTION TRIM(parsed-output-data)
-           END-IF
+           MOVE SPACES TO log-message
+           MOVE output-pos TO log-num-text
+           STRING "Read output bytes: " DELIMITED BY SIZE
+               log-num-text DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
+
+           MOVE SPACES TO log-message
+           STRING "Read output preview: " DELIMITED BY SIZE
+               FUNCTION TRIM(parsed-output-data) DELIMITED BY SIZE
+               INTO log-message
+           END-STRING
+           PERFORM LOG-TRACE
 
            CLOSE JSON-OUTPUT.
+
+      * Logging procedures
+       COPY "copybooks/logging-procedures.cob".
 
        END PROGRAM JSON-DECODER.

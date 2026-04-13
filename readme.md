@@ -108,11 +108,20 @@ Set the API URL if you are not running that:
 export STREGSYSTEM_URL="http://localhost:8000"
 ```
 
-For HTTP client verbosity during tests:
+Logging (shared across all modules):
 
 ```bash
-export COB_HTTP_CLIENT_LOG=2
+export STREGSYSTEM_LOG_LEVEL=4
+export STREGSYSTEM_LOG_SINK=STDERR
+export STREGSYSTEM_LOG_FILE=/tmp/stregsystem.log
 ```
+
+Levels: 0=off, 1=error, 2=warn, 3=info, 4=debug, 5=trace. You can
+also use names like `INFO`, `DEBUG`, or `TRACE`.
+
+By default logs go to stderr. Set `STREGSYSTEM_LOG_SINK=STDOUT` to
+emit to stdout. If `STREGSYSTEM_LOG_FILE` is set, logs are appended to
+that file (useful with the TUI).
 
 ## Developer Notes (and other chaos)
 
