@@ -55,5 +55,4 @@
        PROCEDURE DIVISION.
        MAIN-PROCEDURE.
            CALL "TUI".
-
            STOP RUN.

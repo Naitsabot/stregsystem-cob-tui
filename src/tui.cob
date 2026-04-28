@@ -21,7 +21,7 @@
        DATA DIVISION.
        FILE SECTION.
        FD  CONFIG-FILE.
-        01  CONFIG-LINE         PIC X(256).
+       01  CONFIG-LINE         PIC X(256).
 
        WORKING-STORAGE SECTION.
 
@@ -93,6 +93,7 @@
        01 MAIN-SELECTION-SCREEN
            BACKGROUND-COLOR BG-COLOUR
            FOREGROUND-COLOR FG-COLOUR.
+
            05 BLANK SCREEN.
            05 LINE 2 COLUMN 4 VALUE "WELCOME TO THE".
            05 LINE 4 COLUMN 4 VALUE "  .###:   ##   #####.   ##   #  " &
