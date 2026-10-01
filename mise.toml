@@ -1,0 +1,21 @@
+[tools]
+gnucobol = "3.2"
+jq = "1.8.2"
+
+[tasks.build]
+run = "make"
+
+[tasks.test]
+run = "make test"
+
+[tasks.install]
+run = "bash ./install.sh"
+
+[tasks.uninstall]
+run = "bash ./uninstall.sh"
+
+[tasks.clean]
+run = "make clean"
+
+[tasks.run]
+run = "make run"
